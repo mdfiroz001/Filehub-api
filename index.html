@@ -8,12 +8,12 @@
     <meta name="keywords" content="file storage, secure downloads, premium resources, cloud sharing, file manager">
     <meta name="author" content="FileHub Team">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://file-hubs.vercel.app/">
+    <meta property="og:url" content="https://file-downloads.vercel.app/">
     <meta property="og:title" content="FileHub Premium - Secure Storage & Sharing">
     <meta property="og:description" content="Access and manage your premium files with FileHub. Fast, secure, and powered by AI.">
     <meta property="og:image" content="https://iili.io/fY4mez7.jpg">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://file-hubs.vercel.app/">
+    <meta property="twitter:url" content="https://file-downloads.vercel.app/">
     <meta property="twitter:title" content="FileHub Premium">
     <meta property="twitter:description" content="The ultimate platform for secure file management and premium downloads.">
     <meta property="twitter:image" content="https://iili.io/fY4mez7.jpg">
@@ -420,38 +420,6 @@
         }
         .copy-btn:hover { background: var(--bg); color: var(--text-main); border-color: var(--primary); }
         .copy-btn svg { width: 28px; height: 28px; }
-
-        /* Share Button Styles */
-        .share-btn {
-            background: var(--primary-soft);
-            color: var(--primary);
-            border: none;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-left: 8px;
-            flex-shrink: 0;
-        }
-
-        .share-btn:hover {
-            background: var(--primary);
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .share-btn i {
-            font-size: 18px;
-        }
-
-        .share-btn.copied {
-            background: #10b981;
-            color: white;
-        }
 
         .lightbox-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1342,40 +1310,6 @@
             background: var(--primary);
             color: white;
         }
-
-        /* Toast Notification */
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--surface);
-            color: var(--text-main);
-            padding: 12px 24px;
-            border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 9999;
-            opacity: 0;
-            transition: all 0.3s;
-            border: 1px solid var(--border);
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .toast.success {
-            background: #10b981;
-            color: white;
-        }
-
-        .toast.error {
-            background: #ef4444;
-            color: white;
-        }
     </style>
 </head>
 <body>
@@ -1415,9 +1349,6 @@
 </header>
 
 <div class="container" id="app"></div>
-
-<!-- Toast Notification -->
-<div id="toast" class="toast"></div>
 
 <!-- Modals -->
 <div class="modal-overlay" id="authModal">
@@ -1479,7 +1410,7 @@
 <div class="bottom-sheet" id="aiSheet">
     <div class="sheet-header">
         <button class="sheet-btn sheet-left-btn" id="aiExpandBtn"></button>
-        <span class="sheet-title">AI Assistant</span>
+        <span class="sheet-title">Assistant</span>
         <button class="sheet-btn" id="closeAiSheet">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
@@ -1487,16 +1418,7 @@
     <div class="chat-container" id="chatList">
         <div class="chat-bubble ai">
             <img src="https://iili.io/fYWPWg9.jpg" class="ai-avatar" id="aiAvatar" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <div class="ai-content">👋 Hello! I'm your FileHub AI Assistant. I can help you with:
-            
-• Finding files and resources
-• Uploading and downloading
-• Account and profile issues
-• File sharing and links
-• Admin features
-• And much more!
-
-Ask me anything about FileHub!</div>
+            <div class="ai-content">Hello! I'm your FileHub assistant. How can I help you today?</div>
         </div>
     </div>
     <div class="chat-footer">
@@ -1627,426 +1549,91 @@ Ask me anything about FileHub!</div>
     let chatHistory = [];
     let isAdmin = false;
 
-    // File share links storage
-    let fileLinks = JSON.parse(localStorage.getItem('fileLinks') || '{}');
+    // AI Response Templates
+    const aiResponses = [
+        "I can help you find files, check your uploads, or answer questions about FileHub.",
+        "You can upload files from the upload page. Make sure to provide accurate information.",
+        "Your files will be reviewed by admin before they become public.",
+        "The AI assistant is here to help you with any questions about FileHub.",
+        "Check your profile to see your uploads and statistics.",
+        "Need help with something specific? Just ask!",
+        "You can search for files using the search bar at the top.",
+        "Notifications about your files and updates will appear here.",
+        "To download a file, click on it and follow the instructions. Some files may require watching ads first.",
+        "Your profile shows your ID, join date, and upload statistics.",
+        "You can change your profile picture and update your information.",
+        "If you have any issues, please contact support or ask the admin."
+    ];
 
-    // ==================== AI Assistant Knowledge Base ====================
-    const siteKnowledge = {
-        general: {
-            name: "FileHub",
-            description: "A secure file storage and sharing platform",
-            features: [
-                "Upload and share files",
-                "Secure downloads with ad requirements",
-                "AI assistant for help",
-                "User profiles and statistics",
-                "Admin dashboard for management",
-                "Dark/light theme support",
-                "Mobile responsive design"
-            ]
-        },
-        upload: {
-            howto: "To upload a file, click the upload button (⬆️) at the bottom navigation. Fill in the title, description, file extension, thumbnail URL, download URL, and optional ad requirements. After submission, admin will review and approve it.",
-            requirements: "Files need admin approval before becoming public. You can check status in your profile.",
-            formats: "Supports all file types. Just provide the correct file extension (like .zip, .pdf, .jpg)."
-        },
-        download: {
-            free: "Free files can be downloaded directly by clicking the Download button.",
-            ads: "Some files require watching ads. Click the 'Watch Ads' button and complete the ad to unlock download.",
-            count: "Download counts are tracked and shown on file cards."
-        },
-        profile: {
-            view: "Click the account icon (👤) at the bottom to view your profile.",
-            stats: "Your profile shows total uploads, downloads, ads watched, and join date.",
-            edit: "Click 'Edit Profile' to change your name, username, or avatar URL.",
-            password: "You can change your password from the profile page.",
-            uploads: "Your uploaded files are listed with their status (approved/pending/rejected)."
-        },
-        sharing: {
-            howto: "Click the share button (🔄) on any file card to copy a short link. Share this link with others.",
-            link: "Shared links look like: https://file-hubs.vercel.app/#/file/AbC123",
-            redirect: "When someone clicks the link, they'll be redirected to the original file page after 2 seconds.",
-            storage: "Links are stored in your browser's local storage and work only on your device."
-        },
-        admin: {
-            access: "Admin dashboard is only visible to users with admin privileges.",
-            features: "Admins can approve/reject files, manage banners, manage users, and send notifications.",
-            files: "In Files tab, admins can approve, reject, delete, or edit files.",
-            users: "In Users tab, admins can toggle admin status, activate/deactivate users, or delete users.",
-            notifications: "Admins can send notifications to all users, admins only, or regular users."
-        },
-        auth: {
-            login: "Click the account icon and login with your email and password.",
-            register: "New users can register with name, username, email, and password.",
-            protected: "Some features like upload and profile require login."
-        },
-        theme: {
-            toggle: "Click the sun/moon icon in header to switch between light and dark themes.",
-            save: "Your theme preference is saved for next visits."
-        },
-        search: {
-            howto: "Click the search icon (🔍) in header to search files by title.",
-            filter: "Search filters files in real-time as you type."
-        },
-        ai: {
-            about: "I'm your AI assistant! I can answer questions about FileHub features, help with uploads/downloads, explain profile settings, and more.",
-            capabilities: "I know everything about FileHub - uploads, downloads, profiles, sharing, admin features, and general site information."
+    // Helper Functions
+    function formatCount(n) {
+        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+        return n;
+    }
+
+    function truncateExt(ext) {
+        if (!ext) return 'file';
+        if (ext.length > 5) return ext.substring(0, 5) + '..';
+        return ext;
+    }
+
+    function timeAgoShort(timestamp) {
+        if (!timestamp) return 'recent';
+        const seconds = Math.floor((Date.now() - timestamp) / 1000);
+        if (seconds < 60) return 'just now';
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return minutes + 'm ago';
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return hours + 'h ago';
+        const days = Math.floor(hours / 24);
+        if (days < 30) return days + 'd ago';
+        const months = Math.floor(days / 30);
+        return months + 'mo ago';
+    }
+
+    const getHomeSkeleton = () => {
+        let html = '<div class="skeleton" style="width:100%; aspect-ratio:16/9; margin-bottom:20px;"></div>';
+        html += '<div class="skeleton" style="width:50%; height:25px; margin-bottom:20px;"></div>';
+        html += '<div class="file-grid">';
+        for(let i=0; i<4; i++) {
+            html += `
+            <div style="background:var(--surface); border-radius:12px; padding:10px;">
+                <div class="skeleton sk-img"></div>
+                <div class="skeleton sk-title"></div>
+                <div class="skeleton sk-text"></div>
+            </div>`;
         }
+        html += '</div>';
+        return html;
     };
 
-    // ==================== Enhanced AI Response Function ====================
-    function getAIResponse(message) {
-        const msg = message.toLowerCase();
-        
-        // Greetings
-        if (msg.match(/\b(hi|hello|hey|greetings|sup|howdy)\b/)) {
-            return "👋 Hello! I'm your FileHub AI Assistant. How can I help you today? You can ask me about:\n\n• Uploading files\n• Downloading files\n• Your profile\n• Sharing links\n• Admin features\n• Site themes\n• And more!";
-        }
-        
-        // Thank you
-        if (msg.match(/\b(thank|thanks|appreciate)\b/)) {
-            return "😊 You're welcome! Feel free to ask if you need anything else about FileHub.";
-        }
-        
-        // Goodbye
-        if (msg.match(/\b(bye|goodbye|see you|cya)\b/)) {
-            return "👋 Goodbye! Come back anytime if you need help with FileHub.";
-        }
-
-        // File upload related
-        if (msg.match(/\b(upload|uploading|how to upload|add file|submit file)\b/)) {
-            return siteKnowledge.upload.howto + "\n\n" + siteKnowledge.upload.requirements;
-        }
-
-        // Download related
-        if (msg.match(/\b(download|downloading|get file|free download|paid download)\b/)) {
-            return "📥 **Download Options:**\n\n• **Free files:** Click Download button directly\n• **Ad-supported files:** Watch required ads to unlock\n• Download counts are tracked and visible on file cards\n\n" + siteKnowledge.download.ads;
-        }
-
-        // Profile related
-        if (msg.match(/\b(profile|account|my profile|settings|edit profile)\b/)) {
-            return "👤 **Profile Features:**\n\n" + 
-                   "• View your uploads and download stats\n" +
-                   "• Check file status (approved/pending/rejected)\n" +
-                   "• See total ads watched and join date\n" +
-                   "• Edit your profile information\n" +
-                   "• Change password\n" +
-                   "• Logout from your account\n\n" +
-                   siteKnowledge.profile.edit;
-        }
-
-        // Sharing related
-        if (msg.match(/\b(share|sharing|link|short link|share link|copied)\b/)) {
-            return "🔗 **File Sharing:**\n\n" +
-                   "• Click the share button (🔄) on any file card\n" +
-                   "• A short link is automatically copied to clipboard\n" +
-                   "• Share this link with anyone\n" +
-                   "• When clicked, they'll be redirected to the original file\n" +
-                   "• Links are stored in your browser\n\n" +
-                   siteKnowledge.sharing.link;
-        }
-
-        // Admin related
-        if (msg.match(/\b(admin|administrator|dashboard|manage|approve|reject)\b/)) {
-            return "⚙️ **Admin Features:**\n\n" +
-                   "• Access admin dashboard from profile (if you're an admin)\n" +
-                   "• **Files:** Approve, reject, edit, or delete files\n" +
-                   "• **Banners:** Manage site banners\n" +
-                   "• **Users:** Manage user accounts, toggle admin status\n" +
-                   "• **Notifications:** Send announcements to users\n\n" +
-                   "Note: These features are only available to admin users.";
-        }
-
-        // Theme related
-        if (msg.match(/\b(theme|dark|light|color|appearance)\b/)) {
-            return "🎨 **Theme Options:**\n\n" +
-                   "• Click the sun/moon icon in the top header\n" +
-                   "• Switch between light and dark modes\n" +
-                   "• Your preference is saved for future visits\n" +
-                   "• The theme applies throughout the site";
-        }
-
-        // Search related
-        if (msg.match(/\b(search|find|look for|filter)\b/)) {
-            return "🔍 **Search Feature:**\n\n" +
-                   "• Click the search icon in the header\n" +
-                   "• Type file titles to filter\n" +
-                   "• Real-time filtering as you type\n" +
-                   "• Shows only matching files on the page";
-        }
-
-        // Authentication
-        if (msg.match(/\b(login|log in|sign in|register|sign up|logout|log out)\b/)) {
-            return "🔐 **Authentication:**\n\n" +
-                   "• Click the account icon (👤) at the bottom\n" +
-                   "• Login with email and password\n" +
-                   "• New users can register with name, username, email\n" +
-                   "• Some features require login (upload, profile)\n" +
-                   "• Click logout from profile page";
-        }
-
-        // File information
-        if (msg.match(/\b(file|files|resource|resources|what files)\b/)) {
-            return "📁 **Files on FileHub:**\n\n" +
-                   "• Various file types supported\n" +
-                   "• Each file shows extension and download count\n" +
-                   "• Click any file card for details\n" +
-                   "• Files need admin approval before public\n" +
-                   "• Check file status in your profile";
-        }
-
-        // Help menu
-        if (msg.match(/\b(help|what can you do|capabilities|features)\b/)) {
-            return "🤖 **I can help you with:**\n\n" +
-                   "• 📤 **Uploads:** How to upload files, requirements\n" +
-                   "• 📥 **Downloads:** Free vs ad-supported downloads\n" +
-                   "• 👤 **Profile:** View and edit your profile\n" +
-                   "• 🔗 **Sharing:** Create and share short links\n" +
-                   "• ⚙️ **Admin:** Manage files and users\n" +
-                   "• 🎨 **Theme:** Switch dark/light mode\n" +
-                   "• 🔍 **Search:** Find files\n" +
-                   "• 🔐 **Auth:** Login/register help\n\n" +
-                   "Just ask me anything about FileHub!";
-        }
-
-        // Default response for unknown queries
-        const defaultResponses = [
-            "I'm not sure about that. Could you rephrase your question about FileHub?",
-            "I can help with FileHub features like uploads, downloads, profiles, sharing, and admin tools. What would you like to know?",
-            "That's outside my knowledge area. I specialize in FileHub assistance. Try asking about uploading files or your profile.",
-            "I didn't quite understand. Feel free to ask about specific FileHub features like 'how to upload' or 'profile settings'.",
-            "For the best help, try asking about uploads, downloads, sharing links, profile settings, or admin features."
-        ];
-        
-        return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
-    }
-
-    // ==================== Toast Notification ====================
-    function showToast(message, type = 'normal') {
-        const toast = document.getElementById('toast');
-        toast.textContent = message;
-        toast.className = 'toast show';
-        if (type === 'success') toast.classList.add('success');
-        if (type === 'error') toast.classList.add('error');
-        
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 2000);
-    }
-
-    // ==================== Short Link Functions ====================
-    function generateShortCode() {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < 6; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-
-    function getFileShortLink(fileId, fileType, title) {
-        const key = `short_${fileType}_${fileId}`;
-        let shortCode = localStorage.getItem(key);
-        
-        if (!shortCode) {
-            shortCode = generateShortCode();
-            localStorage.setItem(key, shortCode);
-            
-            const linkData = {
-                fileId,
-                fileType,
-                title,
-                shortCode,
-                createdAt: Date.now(),
-                clicks: 0
-            };
-            localStorage.setItem(`link_${shortCode}`, JSON.stringify(linkData));
-        }
-        
-        return shortCode;
-    }
-
-    window.shareFile = function(fileId, fileType, title, button) {
-        const shortCode = getFileShortLink(fileId, fileType, title);
-        const shortUrl = `${window.location.origin}${window.location.pathname}#/file/${shortCode}`;
-        
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(shortUrl).then(() => {
-                const originalHTML = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check"></i>';
-                button.style.background = '#10b981';
-                button.style.color = 'white';
-                
-                showToast('✅ Sharing link copied!', 'success');
-                
-                setTimeout(() => {
-                    button.innerHTML = '<i class="fas fa-share-alt"></i>';
-                    button.style.background = '';
-                    button.style.color = '';
-                }, 2000);
-            }).catch(() => {
-                fallbackCopy(shortUrl, button);
-            });
-        } else {
-            fallbackCopy(shortUrl, button);
-        }
-    };
-
-    function fallbackCopy(text, button) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        document.body.appendChild(textarea);
-        textarea.select();
-        
-        try {
-            document.execCommand('copy');
-            button.innerHTML = '<i class="fas fa-check"></i>';
-            button.style.background = '#10b981';
-            button.style.color = 'white';
-            showToast('✅ Sharing link copied!', 'success');
-            
-            setTimeout(() => {
-                button.innerHTML = '<i class="fas fa-share-alt"></i>';
-                button.style.background = '';
-                button.style.color = '';
-            }, 2000);
-        } catch (err) {
-            showToast('❌ Copy failed', 'error');
-        }
-        
-        document.body.removeChild(textarea);
-    }
-
-    function handleShortLink() {
-        const hash = window.location.hash;
-        if (hash && hash.startsWith('#/file/')) {
-            const shortCode = hash.replace('#/file/', '');
-            
-            const linkData = localStorage.getItem(`link_${shortCode}`);
-            if (linkData) {
-                const data = JSON.parse(linkData);
-                
-                data.clicks = (data.clicks || 0) + 1;
-                localStorage.setItem(`link_${shortCode}`, JSON.stringify(data));
-                
-                app.innerHTML = `
-                    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center;">
-                        <div style="background: var(--surface); padding: 30px; border-radius: 20px; box-shadow: var(--shadow-md); max-width: 400px;">
-                            <i class="fas fa-link" style="font-size: 48px; color: var(--primary); margin-bottom: 20px;"></i>
-                            <h2 style="margin-bottom: 10px;">Redirecting...</h2>
-                            <p style="color: var(--text-sub); margin-bottom: 20px;">Opening: <strong>${data.title}</strong></p>
-                            <div style="width: 50px; height: 50px; border: 5px solid var(--primary-soft); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto;"></div>
-                            <p style="font-size: 14px; color: var(--text-sub); margin-top: 20px;">Redirecting in 2 seconds...</p>
-                        </div>
-                    </div>
-                `;
-                
-                setTimeout(() => {
-                    window.location.href = `/file/${data.fileId}`;
-                }, 2000);
-            } else {
-                renderError('Link Not Found', 'The sharing link you clicked does not exist or has expired.');
-            }
-        }
-    }
-
-    // ==================== AI Chat Functions ====================
-    function appendMessage(role, text, saveToHistory = true) {
-        const div = document.createElement('div');
-        div.className = `chat-bubble ${role}`;
-        
-        if (role === 'ai') {
-            const parsed = DOMPurify.sanitize(marked.parse(text));
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const avatarUrl = currentTheme === 'dark' ? CHAT_AI_DARK : CHAT_AI_LIGHT;
-            div.innerHTML = `
-                <img src="${avatarUrl}" class="ai-avatar">
-                <div class="ai-content">${parsed}</div>
-            `;
-        } else {
-            div.innerText = text; 
-        }
-        
-        chatList.appendChild(div);
-        scrollToBottom();
-        
-        if (role === 'ai' && saveToHistory) {
-            hljs.highlightAll();
-        }
-    }
-
-    function showTypingIndicator() {
-        const div = document.createElement('div');
-        div.className = 'typing-container';
-        div.id = 'typingIndicator';
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const avatarUrl = currentTheme === 'dark' ? CHAT_AI_DARK : CHAT_AI_LIGHT;
-        
-        div.innerHTML = `
-            <img src="${avatarUrl}" class="ai-loading-img">
-            <div class="typing-dots">
-                <span class="dot"></span>
-                <span class="dot"></span>
-                <span class="dot"></span>
+    const getDetailSkeleton = () => {
+        return `
+            <div class="skeleton" style="width:100%; aspect-ratio:16/9; margin-bottom:20px;"></div>
+            <div class="skeleton" style="width:80%; height:30px; margin-bottom:15px;"></div>
+            <div class="sk-row" style="justify-content:space-between">
+                <div class="skeleton" style="width:80px; height:24px;"></div>
+                <div class="skeleton" style="width:80px; height:24px;"></div>
+                <div class="skeleton" style="width:80px; height:24px;"></div>
             </div>
+            <div class="skeleton" style="width:100%; height:100px; margin-top:20px;"></div>
         `;
-        chatList.appendChild(div);
-        scrollToBottom();
-    }
+    };
 
-    function removeTypingIndicator() {
-        const el = document.getElementById('typingIndicator');
-        if(el) el.remove();
-    }
-
-    function scrollToBottom() {
-        chatList.scrollTop = chatList.scrollHeight;
-    }
-
-    async function sendMessage() {
-        const text = chatInput.value.trim();
-        if(!text) return;
-        
-        chatInput.value = '';
-        chatInput.style.height = 'auto';
-        
-        appendMessage('user', text);
-        showTypingIndicator();
-        
-        try {
-            setTimeout(async () => {
-                removeTypingIndicator();
-                
-                // Get AI response from knowledge base
-                const response = getAIResponse(text);
-                
-                appendMessage('ai', response);
-                
-                // Save to Firebase if user is logged in
-                if (currentUser) {
-                    await chatsRef.push({
-                        userId: currentUser.uid,
-                        role: 'user',
-                        content: text,
-                        timestamp: Date.now()
-                    });
-                    await chatsRef.push({
-                        userId: currentUser.uid,
-                        role: 'ai',
-                        content: response,
-                        timestamp: Date.now()
-                    });
-                }
-            }, 1000);
-            
-        } catch (e) {
-            removeTypingIndicator();
-            appendMessage('ai', '**Error:** Failed to get response. Please try again.');
-            console.error(e);
+    const getNotifSkeleton = () => {
+        let html = '';
+        for(let i=0; i<5; i++) {
+            html += `
+            <div style="padding:15px 20px; border-bottom:1px solid var(--bg)">
+                <div class="skeleton" style="width:100%; height:16px; margin-bottom:8px;"></div>
+                <div class="skeleton" style="width:40%; height:12px;"></div>
+            </div>`;
         }
-    }
+        return html;
+    };
 
-    // ==================== Original Functions ====================
+    // Theme Functions
     function initTheme() {
         const savedTheme = localStorage.getItem('theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -2112,18 +1699,22 @@ Ask me anything about FileHub!</div>
         if (user && !user.isAnonymous) {
             currentUser = user;
             
+            // Get user data
             const userSnap = await usersRef.child(user.uid).once('value');
             currentUserData = userSnap.val() || {};
             
+            // Check if admin
             const adminSnap = await adminsRef.child(user.uid).once('value');
             isAdmin = adminSnap.exists();
             
+            // Show admin badge only for admins
             if (isAdmin) {
                 adminBadge.style.display = 'inline-block';
             } else {
                 adminBadge.style.display = 'none';
             }
             
+            // Load user's theme preference
             if (currentUserData.theme) {
                 document.documentElement.setAttribute('data-theme', currentUserData.theme);
                 updateThemeIcon(currentUserData.theme);
@@ -2132,8 +1723,13 @@ Ask me anything about FileHub!</div>
                 localStorage.setItem('theme', currentUserData.theme);
             }
             
+            // Load notifications
             loadNotifications();
+            
+            // Load chat history
             loadChatHistory();
+            
+            // Update UI
             router();
         } else {
             currentUser = null;
@@ -2142,10 +1738,13 @@ Ask me anything about FileHub!</div>
             adminBadge.style.display = 'none';
             allNotifications = [];
             updateBadge();
+            
+            // Update UI
             router();
         }
     });
 
+    // Protected Navigation
     window.handleProtectedNavigation = (path) => {
         if (currentUser) {
             navigateTo(path);
@@ -2154,6 +1753,7 @@ Ask me anything about FileHub!</div>
         }
     };
 
+    // Modal Functions
     window.openModal = (modalId) => {
         document.getElementById(modalId).classList.add('active');
     };
@@ -2211,6 +1811,7 @@ Ask me anything about FileHub!</div>
         openModal('authModal');
     }
 
+    // Switch between login and register tabs
     window.switchAuthTab = (tab) => {
         const tabs = document.querySelectorAll('.auth-tab');
         const registerFields = document.getElementById('registerFields');
@@ -2228,6 +1829,7 @@ Ask me anything about FileHub!</div>
         }
     };
 
+    // Handle authentication
     async function handleAuth(e) {
         e.preventDefault();
         
@@ -2241,6 +1843,7 @@ Ask me anything about FileHub!</div>
         
         try {
             if (isLogin) {
+                // Login
                 await auth.signInWithEmailAndPassword(email, password);
                 showAuthAlert('Login successful!', 'success');
                 setTimeout(() => {
@@ -2248,6 +1851,7 @@ Ask me anything about FileHub!</div>
                     navigateTo('/');
                 }, 1500);
             } else {
+                // Register
                 const fullName = document.getElementById('regFullName').value;
                 const username = document.getElementById('regUsername').value;
                 
@@ -2257,6 +1861,7 @@ Ask me anything about FileHub!</div>
                 
                 const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                 
+                // Save user data to database
                 await usersRef.child(userCredential.user.uid).set({
                     email: email,
                     fullname: fullName,
@@ -2290,16 +1895,20 @@ Ask me anything about FileHub!</div>
         alert.classList.remove('hidden');
     }
 
+    // Load Data
     async function loadData() {
         try {
+            // Load all files
             const filesSnap = await filesRef.once('value');
             allFiles = filesSnap.val() ? Object.entries(filesSnap.val())
                 .map(([id, data]) => ({ id, ...data })) : [];
             
+            // Load banners
             const bannersSnap = await bannersRef.once('value');
             allBanners = bannersSnap.val() ? Object.entries(bannersSnap.val())
                 .map(([id, data]) => ({ id, ...data })) : [];
             
+            // Load settings
             const settingsSnap = await settingsRef.once('value');
             appSettings = settingsSnap.val() || {};
         } catch (error) {
@@ -2307,6 +1916,7 @@ Ask me anything about FileHub!</div>
         }
     }
 
+    // Notification Functions
     function loadNotifications() {
         if (!currentUser) return;
         
@@ -2420,6 +2030,7 @@ Ask me anything about FileHub!</div>
         notifSheet.classList.add('active');
     });
 
+    // Sheet Functions
     function closeSheetCommon() {
         sheetOverlay.classList.remove('active');
         notifSheet.classList.remove('active');
@@ -2437,6 +2048,7 @@ Ask me anything about FileHub!</div>
     closeAiSheet.addEventListener('click', closeSheetCommon);
     sheetOverlay.addEventListener('click', closeSheetCommon);
 
+    // AI Sheet Functions
     function updateAiLeftIcon() {
         if (isAiExpanded) {
             aiExpandBtn.innerHTML = SVG_COLLAPSE;
@@ -2479,6 +2091,7 @@ Ask me anything about FileHub!</div>
             
             chatHistory = chats;
             
+            // Clear existing messages except the first AI greeting
             while (chatList.children.length > 1) {
                 chatList.removeChild(chatList.lastChild);
             }
@@ -2493,6 +2106,58 @@ Ask me anything about FileHub!</div>
         }
     }
 
+    function appendMessage(role, text, saveToHistory = true) {
+        const div = document.createElement('div');
+        div.className = `chat-bubble ${role}`;
+        
+        if (role === 'ai') {
+            const parsed = DOMPurify.sanitize(marked.parse(text));
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const avatarUrl = getAiAvatarUrl(currentTheme);
+            div.innerHTML = `
+                <img src="${avatarUrl}" class="ai-avatar">
+                <div class="ai-content">${parsed}</div>
+            `;
+        } else {
+            div.innerText = text; 
+        }
+        
+        chatList.appendChild(div);
+        scrollToBottom();
+        
+        if (role === 'ai' && saveToHistory) {
+            hljs.highlightAll();
+        }
+    }
+
+    function showTypingIndicator() {
+        const div = document.createElement('div');
+        div.className = 'typing-container';
+        div.id = 'typingIndicator';
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const avatarUrl = getAiAvatarUrl(currentTheme);
+        
+        div.innerHTML = `
+            <img src="${avatarUrl}" class="ai-loading-img">
+            <div class="typing-dots">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+            </div>
+        `;
+        chatList.appendChild(div);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const el = document.getElementById('typingIndicator');
+        if(el) el.remove();
+    }
+
+    function scrollToBottom() {
+        chatList.scrollTop = chatList.scrollHeight;
+    }
+
     chatSendBtn.addEventListener('click', sendMessage);
     
     chatInput.addEventListener('keypress', (e) => {
@@ -2502,10 +2167,74 @@ Ask me anything about FileHub!</div>
         }
     });
 
-    chatInput.addEventListener('input', function() {
-        this.style.height = 'auto';
-        this.style.height = (this.scrollHeight) + 'px';
-    });
+    async function sendMessage() {
+        const text = chatInput.value.trim();
+        if(!text) return;
+        
+        chatInput.value = '';
+        chatInput.style.height = 'auto';
+        
+        appendMessage('user', text);
+        showTypingIndicator();
+        
+        try {
+            // Save user message
+            if (currentUser) {
+                await chatsRef.push({
+                    userId: currentUser.uid,
+                    role: 'user',
+                    content: text,
+                    timestamp: Date.now()
+                });
+            }
+            
+            // Generate AI response
+            setTimeout(async () => {
+                removeTypingIndicator();
+                
+                let response = "";
+                
+                if (text.toLowerCase().includes('hello') || text.toLowerCase().includes('hi') || text.toLowerCase().includes('hey')) {
+                    response = "Hello! How can I assist you with FileHub today?";
+                } else if (text.toLowerCase().includes('upload')) {
+                    response = "To upload files, click the upload button at the bottom. Fill in the title, description, and URLs. Your file will be reviewed by admin before going public.";
+                } else if (text.toLowerCase().includes('download')) {
+                    response = "Click on any file card to view details. If ads are required, watch them to unlock the download link. Free files can be downloaded directly.";
+                } else if (text.toLowerCase().includes('profile')) {
+                    response = "Your profile shows your statistics, uploaded files, and account info. You can edit your profile and change settings there.";
+                } else if (text.toLowerCase().includes('notification')) {
+                    response = "Notifications keep you updated about your files, approvals, and system announcements. Click the bell icon to view them.";
+                } else if (text.toLowerCase().includes('admin')) {
+                    response = "Admin users have special privileges to manage files, banners, and send notifications to all users.";
+                } else if (text.toLowerCase().includes('balance') || text.toLowerCase().includes('earning')) {
+                    response = "Your balance is shown in your profile. You earn from file downloads and other activities on the platform.";
+                } else if (text.toLowerCase().includes('file') || text.toLowerCase().includes('resource')) {
+                    response = "Browse files on the home page. Use the search bar to find specific resources. Each file has details and download options.";
+                } else if (text.toLowerCase().includes('help')) {
+                    response = "I can help with: uploads, downloads, profile management, notifications, files, and more. Just ask a specific question!";
+                } else {
+                    response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+                }
+                
+                appendMessage('ai', response);
+                
+                // Save AI response
+                if (currentUser) {
+                    await chatsRef.push({
+                        userId: currentUser.uid,
+                        role: 'ai',
+                        content: response,
+                        timestamp: Date.now()
+                    });
+                }
+            }, 1500);
+            
+        } catch (e) {
+            removeTypingIndicator();
+            appendMessage('ai', '**Error:** Failed to get response. Please try again.');
+            console.error(e);
+        }
+    }
 
     // Search Functions
     searchTrigger.addEventListener('click', () => { 
@@ -2599,18 +2328,10 @@ Ask me anything about FileHub!</div>
     // Router
     async function router() {
         const path = window.location.pathname;
-        const hash = window.location.hash;
-        
         clearInterval(bannerInterval);
         clearInterval(detailInterval);
         
         await loadData();
-        
-        // Check for short link first
-        if (hash && hash.startsWith('#/file/')) {
-            handleShortLink();
-            return;
-        }
         
         if (path === '/' || path === '/index.html') {
             renderHome();
@@ -2647,62 +2368,6 @@ Ask me anything about FileHub!</div>
         }
     }
 
-    // Helper Functions
-    function formatCount(n) {
-        if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
-        if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-        return n;
-    }
-
-    function truncateExt(ext) {
-        if (!ext) return 'file';
-        if (ext.length > 5) return ext.substring(0, 5) + '..';
-        return ext;
-    }
-
-    function timeAgoShort(timestamp) {
-        if (!timestamp) return 'recent';
-        const seconds = Math.floor((Date.now() - timestamp) / 1000);
-        if (seconds < 60) return 'just now';
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return minutes + 'm ago';
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return hours + 'h ago';
-        const days = Math.floor(hours / 24);
-        if (days < 30) return days + 'd ago';
-        const months = Math.floor(days / 30);
-        return months + 'mo ago';
-    }
-
-    const getHomeSkeleton = () => {
-        let html = '<div class="skeleton" style="width:100%; aspect-ratio:16/9; margin-bottom:20px;"></div>';
-        html += '<div class="skeleton" style="width:50%; height:25px; margin-bottom:20px;"></div>';
-        html += '<div class="file-grid">';
-        for(let i=0; i<4; i++) {
-            html += `
-            <div style="background:var(--surface); border-radius:12px; padding:10px;">
-                <div class="skeleton sk-img"></div>
-                <div class="skeleton sk-title"></div>
-                <div class="skeleton sk-text"></div>
-            </div>`;
-        }
-        html += '</div>';
-        return html;
-    };
-
-    const getDetailSkeleton = () => {
-        return `
-            <div class="skeleton" style="width:100%; aspect-ratio:16/9; margin-bottom:20px;"></div>
-            <div class="skeleton" style="width:80%; height:30px; margin-bottom:15px;"></div>
-            <div class="sk-row" style="justify-content:space-between">
-                <div class="skeleton" style="width:80px; height:24px;"></div>
-                <div class="skeleton" style="width:80px; height:24px;"></div>
-                <div class="skeleton" style="width:80px; height:24px;"></div>
-            </div>
-            <div class="skeleton" style="width:100%; height:100px; margin-top:20px;"></div>
-        `;
-    };
-
     // Home Page
     function renderHome() {
         document.title = "Dashboard - FileHub";
@@ -2710,8 +2375,10 @@ Ask me anything about FileHub!</div>
         app.innerHTML = getHomeSkeleton();
 
         try {
+            // Get approved files only for home page
             const approvedFiles = allFiles.filter(f => f.status === 'approved');
             
+            // Build banner HTML
             let bannerHTML = '';
             if (allBanners.length > 0) {
                 const dots = allBanners.map((_, i) => `<span class="dot-c ${i===0?'active':''}"></span>`).join('');
@@ -2741,9 +2408,8 @@ Ask me anything about FileHub!</div>
                 <div class="carousel-dots" id="homeDots">${dots}</div>`;
             }
 
-            let filesHTML = approvedFiles.length ? approvedFiles.map(f => {
-                const safeTitle = (f.title || 'Untitled').replace(/'/g, "\\'");
-                return `
+            // Build files HTML
+            let filesHTML = approvedFiles.length ? approvedFiles.map(f => `
                 <div class="file-card" onclick="navigateTo('/file/${f.id}')">
                     <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
                     <div class="card-body">
@@ -2757,13 +2423,9 @@ Ask me anything about FileHub!</div>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                                 ${formatCount(f.total_downloads || 0)}
                             </span>
-                            <button class="share-btn" onclick="event.stopPropagation(); shareFile('${f.id}', 'file', '${safeTitle}', this)">
-                                <i class="fas fa-share-alt"></i>
-                            </button>
                         </div>
                     </div>
-                </div>`;
-            }).join('') : '<p style="text-align:center;color:var(--text-sub);grid-column:1/-1">No files found.</p>';
+                </div>`).join('') : '<p style="text-align:center;color:var(--text-sub);grid-column:1/-1">No files found.</p>';
 
             app.innerHTML = `${bannerHTML}
                 <div class="section-header">
@@ -2796,6 +2458,7 @@ Ask me anything about FileHub!</div>
             const item = { id, ...snapshot.val() };
             document.title = `${item.title || 'File'} - FileHub`;
 
+            // Get watched count
             let watched = 0;
             if (currentUser) {
                 const statusRef = database.ref(`user_file_status/${currentUser.uid}_${item.id}`);
@@ -2805,6 +2468,7 @@ Ask me anything about FileHub!</div>
                 watched = parseInt(localStorage.getItem(`ad_${item.id}`) || '0');
             }
 
+            // Build carousel
             let carouselHTML = '';
             if (item.detail_photos && item.detail_photos.length > 0) {
                 const dots = item.detail_photos.map((_, i) => `<span class="dot-c ${i===0?'active':''}"></span>`).join('');
@@ -2820,7 +2484,6 @@ Ask me anything about FileHub!</div>
             }
 
             const desc = DOMPurify.sanitize(marked.parse(item.description || 'No description available.'));
-            const safeTitle = (item.title || 'Untitled').replace(/'/g, "\\'");
 
             app.innerHTML = `
                 <div class="detail-wrapper">
@@ -2851,7 +2514,7 @@ Ask me anything about FileHub!</div>
                 initCarousel('detailInner', 'detailDots', item.detail_photos.length, false);
             }
 
-            renderUnlockLogic(type, item, watched, safeTitle);
+            renderUnlockLogic(type, item, watched);
 
         } catch(e) {
             console.error('Error loading detail:', e);
@@ -2859,7 +2522,7 @@ Ask me anything about FileHub!</div>
         }
     }
 
-    function renderUnlockLogic(type, item, watched, safeTitle) {
+    function renderUnlockLogic(type, item, watched) {
         const zone = document.getElementById('unlockSection');
         const req = item.required_ads || 0;
         
@@ -2897,9 +2560,6 @@ Ask me anything about FileHub!</div>
                 <button class="copy-btn" onclick="copyPageLink(this, '${window.location.href}')" title="Copy Link">
                     ${SVG_LINK}
                 </button>
-                <button class="share-btn" onclick="shareFile('${item.id}', '${type}', '${safeTitle}', this)" title="Share">
-                    <i class="fas fa-share-alt"></i>
-                </button>
             </div>
             <div id="dlStatus" style="text-align:center; margin-top:10px; font-size:0.85rem; color:var(--text-sub)"></div>`;
 
@@ -2914,6 +2574,7 @@ Ask me anything about FileHub!</div>
                 this.innerText = "Redirecting..."; 
                 this.disabled = true;
                 
+                // Increment download count
                 const ref = type === 'file' ? filesRef : bannersRef;
                 await ref.child(item.id).child('total_downloads').transaction(current => (current || 0) + 1);
                 
@@ -2922,19 +2583,23 @@ Ask me anything about FileHub!</div>
         }
     }
 
+    // Copy Page Link function - FIXED
     window.copyPageLink = (btn, link) => {
+        // Try modern clipboard API first
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).then(() => {
                 showCopySuccess(btn);
             }).catch(err => {
-                fallbackCopyLink(btn, link);
+                console.error('Clipboard API failed:', err);
+                fallbackCopy(btn, link);
             });
         } else {
-            fallbackCopyLink(btn, link);
+            fallbackCopy(btn, link);
         }
     };
 
-    function fallbackCopyLink(btn, link) {
+    function fallbackCopy(btn, link) {
+        // Fallback method using textarea
         const textarea = document.createElement('textarea');
         textarea.value = link;
         textarea.style.position = 'fixed';
@@ -2951,6 +2616,7 @@ Ask me anything about FileHub!</div>
                 showCopyError(btn);
             }
         } catch (err) {
+            console.error('Fallback copy failed:', err);
             showCopyError(btn);
         }
         
@@ -2963,6 +2629,7 @@ Ask me anything about FileHub!</div>
         btn.style.borderColor = '#10b981';
         btn.style.color = '#10b981';
         
+        // Show status message
         const status = document.getElementById('dlStatus');
         if (status) {
             status.innerText = 'Link copied!';
@@ -2993,6 +2660,7 @@ Ask me anything about FileHub!</div>
         }, 3000);
     }
 
+    // triggerAd function with proper Monetag integration
     window.triggerAd = async (fileId, currentWatched, reqAds, zoneId, type) => {
         const btn = document.querySelector('.unlock-btn');
         const originalText = btn.innerHTML;
@@ -3000,15 +2668,19 @@ Ask me anything about FileHub!</div>
         btn.disabled = true;
 
         try {
+            // Load Monetag script if zoneId is provided
             if (zoneId) {
                 await loadMonetagScript(zoneId);
                 
+                // Call Monetag show function
                 if (window[`show_${zoneId}`] && typeof window[`show_${zoneId}`] === 'function') {
                     await window[`show_${zoneId}`]();
                 } else {
+                    // Fallback simulation
                     await new Promise(resolve => setTimeout(resolve, 2000));
                 }
             } else {
+                // No zoneId, simulate ad view
                 await new Promise(resolve => setTimeout(resolve, 2000));
             }
             
@@ -3018,11 +2690,13 @@ Ask me anything about FileHub!</div>
                 const statusRef = database.ref(`user_file_status/${currentUser.uid}_${fileId}`);
                 await statusRef.set(newWatchedCount);
                 
+                // Update user's total ads watched
                 await usersRef.child(currentUser.uid).child('adsWatched').transaction(current => (current || 0) + 1);
             } else {
                 localStorage.setItem(`ad_${fileId}`, newWatchedCount);
             }
 
+            // Reload the page to show updated status
             window.location.reload();
 
         } catch(e) {
@@ -3033,6 +2707,7 @@ Ask me anything about FileHub!</div>
         }
     };
 
+    // loadMonetagScript function
     function loadMonetagScript(zoneId) {
         return new Promise((resolve, reject) => {
             const scriptId = `monetag-script-${zoneId}`;
@@ -3048,10 +2723,11 @@ Ask me anything about FileHub!</div>
             script.onload = resolve;
             script.onerror = () => {
                 console.warn('Monetag script failed to load, using fallback');
-                resolve();
+                resolve(); // Still resolve to continue with fallback
             };
             document.body.appendChild(script);
             
+            // Timeout fallback
             setTimeout(resolve, 3000);
         });
     }
@@ -3196,7 +2872,7 @@ Ask me anything about FileHub!</div>
         });
     }
 
-    // Profile Page
+    // Profile Page - Shows file status
     function renderProfile() {
         document.title = "Profile - FileHub";
         
@@ -3205,26 +2881,31 @@ Ask me anything about FileHub!</div>
             return;
         }
 
+        // Get user's uploads with status
         const userFiles = allFiles.filter(f => f.uploadedBy === currentUser.uid);
         const totalDownloads = userFiles.reduce((sum, f) => sum + (f.total_downloads || 0), 0);
         const approvedFiles = userFiles.filter(f => f.status === 'approved').length;
         const pendingFiles = userFiles.filter(f => f.status === 'pending').length;
         const rejectedFiles = userFiles.filter(f => f.status === 'rejected').length;
 
+        // Get ads watched count
         let adsWatched = 0;
         if (currentUserData && currentUserData.adsWatched) {
             adsWatched = currentUserData.adsWatched;
         }
 
+        // Format join date
         const joinDate = currentUser.metadata?.creationTime ? new Date(currentUser.metadata.creationTime) : new Date();
         const formattedJoinDate = `${joinDate.getMonth()+1}/${joinDate.getDate()}/${joinDate.getFullYear()}`;
 
+        // Get username and fullname with fallbacks
         const username = currentUserData?.username || 'username';
         const fullname = currentUserData?.fullname || currentUser.displayName || 'User';
         const email = currentUser.email || 'email@example.com';
         const avatar = currentUserData?.avatar || 'https://iili.io/fY4mez7.jpg';
         const isActive = currentUserData?.isAccountActive !== false;
 
+        // Add admin dashboard link if user is admin
         const adminLink = isAdmin ? `
             <button class="action-btn" onclick="navigateTo('/admin')">
                 <i class="fas fa-cog"></i>
@@ -3390,7 +3071,7 @@ Ask me anything about FileHub!</div>
         `;
     }
 
-    // Admin Dashboard
+    // Admin Dashboard - Mobile Responsive
     function renderAdminDashboard() {
         document.title = "Admin Dashboard - FileHub";
         
@@ -3399,6 +3080,7 @@ Ask me anything about FileHub!</div>
             return;
         }
 
+        // Get stats
         const totalFiles = allFiles.length;
         const approvedFiles = allFiles.filter(f => f.status === 'approved').length;
         const pendingFiles = allFiles.filter(f => f.status === 'pending').length;
@@ -3462,6 +3144,7 @@ Ask me anything about FileHub!</div>
             </div>
         `;
 
+        // Load files tab by default
         loadAdminFilesTab();
     }
 
@@ -3610,6 +3293,7 @@ Ask me anything about FileHub!</div>
             .map(([id, data]) => ({ uid: id, ...data }))
             .sort((a, b) => b.created_at - a.created_at) : [];
 
+        // Check which users are admins
         const adminSnapshot = await adminsRef.once('value');
         const adminUsers = adminSnapshot.val() ? Object.keys(adminSnapshot.val()) : [];
 
@@ -3705,23 +3389,108 @@ Ask me anything about FileHub!</div>
                         </select>
                     </div>
                     
+                    <div class="form-group">
+                        <label class="form-label">Link Button (optional)</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <input type="url" id="notifLink" class="form-control" placeholder="https://example.com" style="flex: 1;">
+                            <input type="text" id="notifLinkText" class="form-control" placeholder="Button Text" value="Click Here" style="width: 120px;">
+                        </div>
+                    </div>
+                    
                     <button class="btn btn-primary" onclick="sendNotification()">
                         <i class="fas fa-paper-plane"></i> Send Notification
                     </button>
                 </div>
+
+                <h3 style="margin: 30px 0 15px;">Recent Notifications</h3>
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Target</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="notificationsList">
+                            <tr>
+                                <td colspan="4" style="text-align: center;">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
+
+        // Live markdown preview
+        const descInput = document.getElementById('notifDesc');
+        const preview = document.getElementById('markdownPreview');
+        
+        if (descInput && preview) {
+            descInput.addEventListener('input', () => {
+                preview.innerHTML = DOMPurify.sanitize(marked.parse(descInput.value));
+            });
+        }
+
+        // Load recent notifications
+        notificationsRef.orderByChild('created_at').limitToLast(10).once('value', (snapshot) => {
+            const notifications = snapshot.val() ? Object.entries(snapshot.val())
+                .map(([id, data]) => ({ id, ...data }))
+                .sort((a, b) => b.created_at - a.created_at) : [];
+
+            const tbody = document.getElementById('notificationsList');
+            tbody.innerHTML = notifications.map(n => `
+                <tr>
+                    <td>${n.title || 'Notification'}</td>
+                    <td>${n.target_uid === 'all' ? 'All Users' : n.target_uid}</td>
+                    <td>${timeAgoShort(n.created_at)}</td>
+                    <td>
+                        <button class="admin-action-btn delete" onclick="deleteNotification('${n.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        });
     }
 
+    // Admin Actions
     window.approveFile = async (fileId) => {
         if (!confirm('Approve this file?')) return;
         await filesRef.child(fileId).update({ status: 'approved' });
+        
+        // Send notification to user
+        const file = (await filesRef.child(fileId).once('value')).val();
+        if (file.uploadedBy) {
+            await notificationsRef.push({
+                title: 'File Approved',
+                decs: `Your file "${file.title}" has been approved and is now public.`,
+                target_uid: file.uploadedBy,
+                is_read: false,
+                created_at: Date.now()
+            });
+        }
+        
         loadAdminFilesTab();
     };
 
     window.rejectFile = async (fileId) => {
         if (!confirm('Reject this file?')) return;
         await filesRef.child(fileId).update({ status: 'rejected' });
+        
+        // Send notification to user
+        const file = (await filesRef.child(fileId).once('value')).val();
+        if (file.uploadedBy) {
+            await notificationsRef.push({
+                title: 'File Rejected',
+                decs: `Your file "${file.title}" has been rejected. Please check the guidelines and try again.`,
+                target_uid: file.uploadedBy,
+                is_read: false,
+                created_at: Date.now()
+            });
+        }
+        
         loadAdminFilesTab();
     };
 
@@ -3755,7 +3524,8 @@ Ask me anything about FileHub!</div>
     };
 
     window.deleteUser = async (userId) => {
-        if (!confirm('Delete this user permanently?')) return;
+        if (!confirm('Delete this user permanently? This cannot be undone!')) return;
+        
         try {
             await usersRef.child(userId).remove();
             await adminsRef.child(userId).remove();
@@ -3765,29 +3535,195 @@ Ask me anything about FileHub!</div>
         }
     };
 
+    // Enhanced sendNotification with link button
     window.sendNotification = async () => {
         const title = document.getElementById('notifTitle').value;
         const desc = document.getElementById('notifDesc').value;
         const target = document.getElementById('notifTarget').value;
+        const link = document.getElementById('notifLink')?.value;
+        const linkText = document.getElementById('notifLinkText')?.value || 'Click Here';
 
         if (!title || !desc) {
             alert('Please fill all fields');
             return;
         }
 
-        await notificationsRef.push({
-            title: title,
-            decs: desc,
-            target_uid: target === 'all' ? 'all' : target,
-            is_read: false,
-            created_at: Date.now()
-        });
+        // Add link button to description if provided
+        let finalDesc = desc;
+        if (link) {
+            finalDesc += `\n\n<a href="${link}" class="link-btn" target="_blank"><i class="fas fa-external-link-alt"></i> ${linkText}</a>`;
+        }
+
+        if (target === 'admins') {
+            const adminSnapshot = await adminsRef.once('value');
+            const admins = adminSnapshot.val() ? Object.keys(adminSnapshot.val()) : [];
+            for (const uid of admins) {
+                await notificationsRef.push({
+                    title: title,
+                    decs: finalDesc,
+                    target_uid: uid,
+                    is_read: false,
+                    created_at: Date.now()
+                });
+            }
+        } else if (target === 'users') {
+            const userSnapshot = await usersRef.once('value');
+            const users = userSnapshot.val() ? Object.keys(userSnapshot.val()) : [];
+            for (const uid of users) {
+                const isAdmin = await adminsRef.child(uid).once('value');
+                if (!isAdmin.exists()) {
+                    await notificationsRef.push({
+                        title: title,
+                        decs: finalDesc,
+                        target_uid: uid,
+                        is_read: false,
+                        created_at: Date.now()
+                    });
+                }
+            }
+        } else {
+            await notificationsRef.push({
+                title: title,
+                decs: finalDesc,
+                target_uid: 'all',
+                is_read: false,
+                created_at: Date.now()
+            });
+        }
 
         document.getElementById('notifTitle').value = '';
         document.getElementById('notifDesc').value = '';
+        document.getElementById('notifLink').value = '';
+        document.getElementById('notifLinkText').value = 'Click Here';
+        document.getElementById('markdownPreview').innerHTML = '';
+        
         alert('Notification sent!');
+        loadAdminNotificationsTab();
     };
 
+    window.deleteNotification = async (notifId) => {
+        if (!confirm('Delete this notification?')) return;
+        await notificationsRef.child(notifId).remove();
+        loadAdminNotificationsTab();
+    };
+
+    // Open Edit File Modal (Admin only)
+    window.openEditFileModal = async (fileId, type) => {
+        const ref = type === 'file' ? filesRef : bannersRef;
+        const snapshot = await ref.child(fileId).once('value');
+        const file = snapshot.val();
+
+        document.getElementById('editFileModalContent').innerHTML = `
+            <h2 class="modal-title">Edit ${type === 'file' ? 'File' : 'Banner'}</h2>
+            <div id="editFileAlert" class="alert hidden"></div>
+            <form id="editFileForm">
+                <div class="form-group">
+                    <label class="form-label">Title</label>
+                    <input type="text" id="editTitle" class="form-control" value="${file.title || ''}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea id="editDescription" class="form-control" rows="4" required>${file.description || ''}</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">File Extension</label>
+                    <input type="text" id="editExtension" class="form-control" value="${file.file_extension || ''}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Thumbnail URL</label>
+                    <input type="url" id="editThumbnail" class="form-control" value="${file.thumbnail_url || ''}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Download URL</label>
+                    <input type="url" id="editDownload" class="form-control" value="${file.download_url || ''}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Required Ads</label>
+                    <input type="number" id="editAds" class="form-control" value="${file.required_ads || 0}" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Monetag Zone ID</label>
+                    <input type="text" id="editZone" class="form-control" value="${file.monitech_ad_id || ''}">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Detail Photos (comma separated URLs)</label>
+                    <textarea id="editPhotos" class="form-control" rows="2">${(file.detail_photos || []).join(', ')}</textarea>
+                </div>
+                
+                ${type === 'file' ? `
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select id="editStatus" class="form-control">
+                        <option value="approved" ${file.status === 'approved' ? 'selected' : ''}>Approved</option>
+                        <option value="pending" ${file.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="rejected" ${file.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    </select>
+                </div>
+                ` : ''}
+                
+                <button type="submit" class="btn btn-primary w-full" id="editFileBtn">
+                    <i class="fas fa-save mr-2"></i> Save Changes
+                </button>
+            </form>
+        `;
+
+        document.getElementById('editFileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const btn = document.getElementById('editFileBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+
+            const updates = {
+                title: document.getElementById('editTitle').value,
+                description: document.getElementById('editDescription').value,
+                file_extension: document.getElementById('editExtension').value,
+                thumbnail_url: document.getElementById('editThumbnail').value,
+                download_url: document.getElementById('editDownload').value,
+                required_ads: parseInt(document.getElementById('editAds').value) || 0,
+                monitech_ad_id: document.getElementById('editZone').value,
+                detail_photos: document.getElementById('editPhotos').value.split(',').map(u => u.trim()).filter(u => u)
+            };
+
+            if (type === 'file') {
+                updates.status = document.getElementById('editStatus').value;
+            }
+
+            try {
+                await ref.child(fileId).update(updates);
+                
+                document.getElementById('editFileAlert').className = 'alert alert-success';
+                document.getElementById('editFileAlert').classList.remove('hidden');
+                document.getElementById('editFileAlert').textContent = 'File updated successfully!';
+                
+                setTimeout(() => {
+                    closeModal('editFileModal');
+                    if (type === 'file') {
+                        loadAdminFilesTab();
+                    } else {
+                        loadAdminBannersTab();
+                    }
+                }, 1500);
+            } catch (error) {
+                document.getElementById('editFileAlert').className = 'alert alert-error';
+                document.getElementById('editFileAlert').classList.remove('hidden');
+                document.getElementById('editFileAlert').textContent = error.message;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Changes';
+            }
+        });
+
+        openModal('editFileModal');
+    };
+
+    // Edit Profile Functions
     window.openEditProfileModal = () => {
         document.getElementById('editProfileModalContent').innerHTML = `
             <h2 class="modal-title">Edit Profile</h2>
@@ -3844,6 +3780,7 @@ Ask me anything about FileHub!</div>
         }
     }
 
+    // Change Password Functions
     window.openChangePasswordModal = () => {
         document.getElementById('changePasswordModalContent').innerHTML = `
             <h2 class="modal-title">Change Password</h2>
@@ -3936,6 +3873,7 @@ Ask me anything about FileHub!</div>
         }
     }
 
+    // Load all users for admin
     async function loadAllUsers() {
         const snapshot = await usersRef.once('value');
         allUsers = snapshot.val() ? Object.entries(snapshot.val())
@@ -3944,17 +3882,15 @@ Ask me anything about FileHub!</div>
 
     let allUsers = [];
 
+    // Chat Input Auto-resize
+    chatInput.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+    });
+
     // Initialize
     initTheme();
     loadAllUsers();
-
-    // Check for short links on load and hash change
-    window.addEventListener('load', () => {
-        if (window.location.hash) {
-            handleShortLink();
-        }
-    });
-    window.addEventListener('hashchange', handleShortLink);
 
     // Router
     window.addEventListener('popstate', router);
