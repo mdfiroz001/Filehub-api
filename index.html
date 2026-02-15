@@ -8,12 +8,12 @@
     <meta name="keywords" content="file storage, secure downloads, premium resources, cloud sharing, file manager">
     <meta name="author" content="FileHub Team">
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://file-downloads.vercel.app/">
+    <meta property="og:url" content="https://file-hubs.vercel.app/">
     <meta property="og:title" content="FileHub Premium - Secure Storage & Sharing">
     <meta property="og:description" content="Access and manage your premium files with FileHub. Fast, secure, and powered by AI.">
     <meta property="og:image" content="https://iili.io/fY4mez7.jpg">
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://file-downloads.vercel.app/">
+    <meta property="twitter:url" content="https://file-hubs.vercel.app/">
     <meta property="twitter:title" content="FileHub Premium">
     <meta property="twitter:description" content="The ultimate platform for secure file management and premium downloads.">
     <meta property="twitter:image" content="https://iili.io/fY4mez7.jpg">
@@ -72,8 +72,6 @@
             --success: #10b981;
             --warning: #f59e0b;
             --danger: #ef4444;
-            --ad-timer-bg: rgba(0,0,0,0.8);
-            --ad-timer-text: #ffffff;
         }
 
         [data-theme="dark"] {
@@ -118,163 +116,6 @@
             overflow-x: hidden; padding-bottom: calc(var(--nav-height) + 30px);
             transition: background 0.3s ease, color 0.3s ease;
             touch-action: pan-x pan-y;
-        }
-
-        /* Ad Timer Popup Styles */
-        .ad-timer-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9999;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-
-        .ad-timer-overlay.active {
-            display: flex;
-        }
-
-        .ad-timer-box {
-            background: var(--surface);
-            border-radius: 24px;
-            padding: 30px;
-            max-width: 350px;
-            width: 90%;
-            text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: popIn 0.3s ease;
-        }
-
-        .ad-timer-icon {
-            width: 80px;
-            height: 80px;
-            background: var(--primary-soft);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: var(--primary);
-            font-size: 2.5rem;
-        }
-
-        .ad-timer-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--text-main);
-        }
-
-        .ad-timer-message {
-            color: var(--text-sub);
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-        }
-
-        .ad-timer-countdown {
-            font-size: 3.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin-bottom: 20px;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .ad-timer-warning {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .ad-timer-warning.active {
-            display: flex;
-        }
-
-        .ad-timer-warning i {
-            font-size: 1.2rem;
-        }
-
-        .ad-timer-progress {
-            width: 100%;
-            height: 6px;
-            background: var(--border);
-            border-radius: 3px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-
-        .ad-timer-progress-bar {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 1s linear;
-        }
-
-        @keyframes popIn {
-            from {
-                transform: scale(0.8);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* Popup Message Styles */
-        .popup-message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100px);
-            background: var(--surface);
-            color: var(--text-main);
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            transition: transform 0.3s ease;
-            border-left: 4px solid var(--primary);
-            max-width: 90%;
-        }
-
-        .popup-message.show {
-            transform: translateX(-50%) translateY(0);
-        }
-
-        .popup-message.error {
-            border-left-color: #ef4444;
-        }
-
-        .popup-message.success {
-            border-left-color: #10b981;
-        }
-
-        .popup-message i {
-            font-size: 1.3rem;
-        }
-
-        .popup-message.error i {
-            color: #ef4444;
-        }
-
-        .popup-message.success i {
-            color: #10b981;
         }
 
         @keyframes shimmer {
@@ -406,7 +247,6 @@
         .notif-detail-content { line-height: 1.6; color: var(--text-main); font-size: 0.95rem; }
         .notif-detail-content p { margin-bottom: 15px; }
         .notif-detail-content a { color: var(--primary); }
-        .notif-detail-content img { max-width: 100%; border-radius: 8px; margin: 10px 0; }
 
         .chat-container {
             flex: 1; overflow-y: auto; padding: 20px;
@@ -546,12 +386,17 @@
         .detail-desc p { margin-bottom: 15px; }
         .detail-desc img { 
             max-width: 100%; 
-            height: auto; 
             border-radius: 12px; 
             margin: 15px 0; 
+            cursor: pointer;
+            transition: 0.3s;
             box-shadow: var(--shadow-sm);
-            display: block;
         }
+        .detail-desc img:hover {
+            transform: scale(1.02);
+            box-shadow: var(--shadow-md);
+        }
+        
         .unlock-inline { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
         
         .unlock-actions {
@@ -574,8 +419,8 @@
             display: flex; justify-content: center; align-items: center;
             flex-shrink: 0; transition: 0.2s;
             height: auto; 
-            min-width: 54px;
-            width: 54px;
+            min-width: 100px;
+            width: auto;
         }
         .copy-btn:hover { background: var(--bg); color: var(--text-main); border-color: var(--primary); }
         .copy-btn svg { width: 28px; height: 28px; }
@@ -1450,6 +1295,11 @@
             border-radius: 8px;
             overflow-x: auto;
         }
+        .markdown-preview img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
 
         /* Link Button */
         .link-btn {
@@ -1469,48 +1319,9 @@
             background: var(--primary);
             color: white;
         }
-
-        /* Adsterra Ad Container (hidden) */
-        #adsterra-container {
-            position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 1px;
-            height: 1px;
-            opacity: 0;
-            pointer-events: none;
-        }
     </style>
 </head>
 <body>
-
-<!-- Popup Message Container -->
-<div id="popupMessage" class="popup-message">
-    <i class="fas fa-info-circle"></i>
-    <span id="popupMessageText"></span>
-</div>
-
-<!-- Ad Timer Overlay -->
-<div class="ad-timer-overlay" id="adTimerOverlay">
-    <div class="ad-timer-box">
-        <div class="ad-timer-icon">
-            <i class="fas fa-ad"></i>
-        </div>
-        <h2 class="ad-timer-title" id="adTimerTitle">Watching Ad</h2>
-        <p class="ad-timer-message" id="adTimerMessage">Please wait while the ad loads...</p>
-        <div class="ad-timer-countdown" id="adTimerCountdown">10</div>
-        <div class="ad-timer-warning" id="adTimerWarning">
-            <i class="fas fa-exclamation-triangle"></i>
-            <span>Don't go back! Ad will not count!</span>
-        </div>
-        <div class="ad-timer-progress">
-            <div class="ad-timer-progress-bar" id="adTimerProgress"></div>
-        </div>
-    </div>
-</div>
-
-<!-- Hidden Adsterra Container -->
-<div id="adsterra-container"></div>
 
 <header>
     <div class="header-content">
@@ -1732,26 +1543,6 @@
     const editFileModal = document.getElementById('editFileModal');
     const sendNotificationModal = document.getElementById('sendNotificationModal');
 
-    // Ad Timer Elements
-    const adTimerOverlay = document.getElementById('adTimerOverlay');
-    const adTimerTitle = document.getElementById('adTimerTitle');
-    const adTimerMessage = document.getElementById('adTimerMessage');
-    const adTimerCountdown = document.getElementById('adTimerCountdown');
-    const adTimerWarning = document.getElementById('adTimerWarning');
-    const adTimerProgress = document.getElementById('adTimerProgress');
-
-    // Popup Message Elements
-    const popupMessage = document.getElementById('popupMessage');
-    const popupMessageText = document.getElementById('popupMessageText');
-
-    // Ad Timer State
-    let adTimerInterval = null;
-    let adTimerTimeout = null;
-    let currentAdData = null;
-    let isAdInProgress = false;
-    let pageVisibilityHandler = null;
-    let beforeUnloadHandler = null;
-
     // State
     let currentUser = null;
     let currentUserData = null;
@@ -1766,9 +1557,6 @@
     let notifListener = null;
     let chatHistory = [];
     let isAdmin = false;
-
-    // Default ad wait time (seconds) - Configurable
-    let defaultAdWaitTime = 10; // Default 10 seconds
 
     // AI Response Templates
     const aiResponses = [
@@ -1811,17 +1599,6 @@
         if (days < 30) return days + 'd ago';
         const months = Math.floor(days / 30);
         return months + 'mo ago';
-    }
-
-    // Popup Message Function - Fixed
-    function showPopupMessage(message, type = 'info', duration = 3000) {
-        popupMessageText.textContent = message;
-        popupMessage.className = `popup-message ${type}`;
-        popupMessage.classList.add('show');
-        
-        setTimeout(() => {
-            popupMessage.classList.remove('show');
-        }, duration);
     }
 
     const getHomeSkeleton = () => {
@@ -1961,9 +1738,6 @@
             // Load chat history
             loadChatHistory();
             
-            // Load settings
-            loadSettings();
-            
             // Update UI
             router();
         } else {
@@ -1978,21 +1752,6 @@
             router();
         }
     });
-
-    // Load Settings (including ad wait time)
-    async function loadSettings() {
-        try {
-            const snapshot = await settingsRef.once('value');
-            appSettings = snapshot.val() || {};
-            
-            // Load default ad wait time from settings
-            if (appSettings.adWaitTime) {
-                defaultAdWaitTime = parseInt(appSettings.adWaitTime) || 10;
-            }
-        } catch (error) {
-            console.error('Error loading settings:', error);
-        }
-    }
 
     // Protected Navigation
     window.handleProtectedNavigation = (path) => {
@@ -2148,7 +1907,7 @@
     // Load Data
     async function loadData() {
         try {
-            // Load all files
+            // Load all files (not just approved)
             const filesSnap = await filesRef.once('value');
             allFiles = filesSnap.val() ? Object.entries(filesSnap.val())
                 .map(([id, data]) => ({ id, ...data })) : [];
@@ -2161,11 +1920,6 @@
             // Load settings
             const settingsSnap = await settingsRef.once('value');
             appSettings = settingsSnap.val() || {};
-            
-            // Load default ad wait time from settings
-            if (appSettings.adWaitTime) {
-                defaultAdWaitTime = parseInt(appSettings.adWaitTime) || 10;
-            }
         } catch (error) {
             console.error('Error loading data:', error);
         }
@@ -2467,8 +2221,6 @@
                     response = "Browse files on the home page. Use the search bar to find specific resources. Each file has details and download options.";
                 } else if (text.toLowerCase().includes('help')) {
                     response = "I can help with: uploads, downloads, profile management, notifications, files, and more. Just ask a specific question!";
-                } else if (text.toLowerCase().includes('ad') || text.toLowerCase().includes('timer') || text.toLowerCase().includes('wait')) {
-                    response = `The default ad wait time is ${defaultAdWaitTime} seconds. You need to stay on the ad page for the full duration, otherwise the ad won't count.`;
                 } else {
                     response = aiResponses[Math.floor(Math.random() * aiResponses.length)];
                 }
@@ -2667,9 +2419,9 @@
 
             // Build files HTML
             let filesHTML = approvedFiles.length ? approvedFiles.map(f => `
-                <div class="file-card" onclick="navigateTo('/file/${f.id}')">
-                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-                    <div class="card-body">
+                <div class="file-card">
+                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='" onclick="openLightbox(this.src); event.stopPropagation();">
+                    <div class="card-body" onclick="navigateTo('/file/${f.id}')">
                         <div class="card-title">${f.title || 'Untitled'}</div>
                         <div class="card-footer">
                             <span class="meta-pill">
@@ -2699,7 +2451,7 @@
         }
     }
 
-    // Detail Page
+    // Detail Page with Markdown Support
     async function renderDetail(type, id) {
         app.innerHTML = getDetailSkeleton();
 
@@ -2725,9 +2477,6 @@
                 watched = parseInt(localStorage.getItem(`ad_${item.id}`) || '0');
             }
 
-            // Get ad wait time from file settings or use default
-            const adWaitTime = item.ad_wait_time || defaultAdWaitTime;
-
             // Build carousel
             let carouselHTML = '';
             if (item.detail_photos && item.detail_photos.length > 0) {
@@ -2743,13 +2492,8 @@
                  carouselHTML = `<div class="carousel-wrap"><div class="slide"><img src="${item.thumbnail_url}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></div></div>`;
             }
 
+            // Parse description with Markdown
             const desc = DOMPurify.sanitize(marked.parse(item.description || 'No description available.'));
-
-            // Show ad wait time in description if not zero
-            let adInfoHtml = '';
-            if (item.required_ads > 0) {
-                adInfoHtml = `<p><strong>⏱️ Ad Wait Time:</strong> ${adWaitTime} seconds per ad</p>`;
-            }
 
             app.innerHTML = `
                 <div class="detail-wrapper">
@@ -2771,16 +2515,27 @@
                             </span>
                         </div>
                     </div>
-                    <div class="detail-desc markdown-body">${desc} ${adInfoHtml}</div>
+                    <div class="detail-desc markdown-body">${desc}</div>
                     <div id="unlockSection" class="unlock-inline"></div>
                 </div>`;
+            
+            // Make all images in description clickable for lightbox
+            setTimeout(() => {
+                document.querySelectorAll('.detail-desc img').forEach(img => {
+                    img.style.cursor = 'pointer';
+                    img.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openLightbox(img.src);
+                    });
+                });
+            }, 100);
             
             hljs.highlightAll();
             if (item.detail_photos && item.detail_photos.length > 1) {
                 initCarousel('detailInner', 'detailDots', item.detail_photos.length, false);
             }
 
-            renderUnlockLogic(type, item, watched, adWaitTime);
+            renderUnlockLogic(type, item, watched);
 
         } catch(e) {
             console.error('Error loading detail:', e);
@@ -2788,7 +2543,7 @@
         }
     }
 
-    function renderUnlockLogic(type, item, watched, adWaitTime) {
+    function renderUnlockLogic(type, item, watched) {
         const zone = document.getElementById('unlockSection');
         const req = item.required_ads || 0;
         
@@ -2809,8 +2564,8 @@
                 '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:20px;height:20px"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
 
             mainBtnHtml = `
-                <button class="unlock-btn" onclick="startAdTimer('${item.id}', ${watched}, ${req}, ${adWaitTime}, '${item.adsterra_link || ''}', '${type}')">
-                    ${icon} ${btnText} (${adWaitTime}s)
+                <button class="unlock-btn" onclick="triggerAd('${item.id}', ${watched}, ${req}, '${item.monitech_ad_id || ''}', '${type}')">
+                    ${icon} ${btnText}
                 </button>`;
         } else {
             mainBtnHtml = `
@@ -2849,268 +2604,95 @@
         }
     }
 
-    // Ad Timer Functions
-    window.startAdTimer = (fileId, currentWatched, reqAds, waitTime, adsterraLink, type) => {
-        // Check if ad is already in progress
-        if (isAdInProgress) {
-            showPopupMessage('An ad is already in progress!', 'error');
-            return;
-        }
-
-        // Validate Adsterra link
-        if (!adsterraLink) {
-            showPopupMessage('No Adsterra link configured for this file!', 'error');
-            return;
-        }
-
-        // Store ad data
-        currentAdData = {
-            fileId,
-            currentWatched,
-            reqAds,
-            waitTime,
-            adsterraLink,
-            type,
-            startTime: Date.now(),
-            adCompleted: false
-        };
-
-        // Show timer overlay
-        adTimerTitle.textContent = 'Watching Ad';
-        adTimerMessage.textContent = `Please wait ${waitTime} seconds...`;
-        adTimerCountdown.textContent = waitTime;
-        adTimerWarning.classList.remove('active');
-        adTimerProgress.style.width = '0%';
-        adTimerOverlay.classList.add('active');
-
-        // Set flag
-        isAdInProgress = true;
-
-        // Open Adsterra link in new tab
-        const adWindow = window.open(adsterraLink, '_blank');
-
-        // Start countdown
-        let timeLeft = waitTime;
-        adTimerInterval = setInterval(() => {
-            timeLeft--;
-            adTimerCountdown.textContent = timeLeft;
+    // Copy Page Link function
+    window.copyPageLink = (btn, link) => {
+        navigator.clipboard.writeText(link).then(() => {
+            const originalIcon = btn.innerHTML;
+            btn.innerHTML = SVG_CHECK;
+            btn.style.borderColor = '#10b981';
+            btn.style.color = '#10b981';
             
-            // Update progress bar
-            const progress = ((waitTime - timeLeft) / waitTime) * 100;
-            adTimerProgress.style.width = progress + '%';
-
-            if (timeLeft <= 0) {
-                clearInterval(adTimerInterval);
-                adTimerCountdown.textContent = '0';
-                completeAd();
-            }
-        }, 1000);
-
-        // Set timeout to complete ad
-        adTimerTimeout = setTimeout(completeAd, waitTime * 1000);
-
-        // Setup page visibility change detection
-        pageVisibilityHandler = () => {
-            if (document.hidden) {
-                // User switched tabs or minimized
-                adTimerWarning.classList.add('active');
-                adTimerTitle.textContent = 'Warning!';
-                adTimerMessage.textContent = 'You left the page! Ad will not count if you go back!';
-            } else {
-                // User came back
-                if (!currentAdData.adCompleted) {
-                    adTimerWarning.classList.remove('active');
-                    adTimerTitle.textContent = 'Watching Ad';
-                    adTimerMessage.textContent = `Please wait ${Math.ceil((currentAdData.waitTime * 1000 - (Date.now() - currentAdData.startTime)) / 1000)} seconds...`;
-                }
-            }
-        };
-        document.addEventListener('visibilitychange', pageVisibilityHandler);
-
-        // Setup beforeunload event to detect tab close
-        beforeUnloadHandler = (e) => {
-            if (!currentAdData.adCompleted) {
-                // Cancel the ad if user tries to close
-                cancelAd('You closed the tab! Ad did not count!');
-                e.preventDefault();
-                e.returnValue = '';
-            }
-        };
-        window.addEventListener('beforeunload', beforeUnloadHandler);
-
-        // Check if ad window was blocked
-        if (!adWindow || adWindow.closed || typeof adWindow.closed === 'undefined') {
-            cancelAd('Popup blocked! Please allow popups for this site.');
-        }
+            setTimeout(() => {
+                btn.innerHTML = originalIcon;
+                btn.style.borderColor = '';
+                btn.style.color = '';
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            document.getElementById('dlStatus').innerText = 'Failed to copy link.';
+        });
     };
 
-    function completeAd() {
-        if (!currentAdData || currentAdData.adCompleted) return;
+    // triggerAd function with proper Monetag integration
+    window.triggerAd = async (fileId, currentWatched, reqAds, zoneId, type) => {
+        const btn = document.querySelector('.unlock-btn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+        btn.disabled = true;
 
-        // Mark ad as completed
-        currentAdData.adCompleted = true;
-
-        // Clean up
-        clearAdTimer();
-
-        // Update watched count
-        updateWatchedCount(currentAdData.fileId, currentAdData.currentWatched + 1, currentAdData.reqAds, currentAdData.type);
-
-        // Hide timer overlay
-        adTimerOverlay.classList.remove('active');
-
-        // Show success message
-        showPopupMessage('Ad completed! +1 ad counted.', 'success');
-
-        // Reset current ad data
-        currentAdData = null;
-    }
-
-    function cancelAd(message) {
-        if (!currentAdData || currentAdData.adCompleted) return;
-
-        // Clean up
-        clearAdTimer();
-
-        // Show error message
-        showPopupMessage(message || 'Ad cancelled! Did not count.', 'error');
-
-        // Hide timer overlay
-        adTimerOverlay.classList.remove('active');
-
-        // Reset current ad data
-        currentAdData = null;
-        isAdInProgress = false;
-    }
-
-    function clearAdTimer() {
-        if (adTimerInterval) {
-            clearInterval(adTimerInterval);
-            adTimerInterval = null;
-        }
-        if (adTimerTimeout) {
-            clearTimeout(adTimerTimeout);
-            adTimerTimeout = null;
-        }
-        if (pageVisibilityHandler) {
-            document.removeEventListener('visibilitychange', pageVisibilityHandler);
-            pageVisibilityHandler = null;
-        }
-        if (beforeUnloadHandler) {
-            window.removeEventListener('beforeunload', beforeUnloadHandler);
-            beforeUnloadHandler = null;
-        }
-        isAdInProgress = false;
-    }
-
-    async function updateWatchedCount(fileId, newWatched, reqAds, type) {
         try {
+            // Load Monetag script if zoneId is provided
+            if (zoneId) {
+                await loadMonetagScript(zoneId);
+                
+                // Call Monetag show function
+                if (window[`show_${zoneId}`] && typeof window[`show_${zoneId}`] === 'function') {
+                    await window[`show_${zoneId}`]();
+                } else {
+                    // Fallback simulation
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+            } else {
+                // No zoneId, simulate ad view
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            }
+            
+            const newWatchedCount = currentWatched + 1;
+
             if (currentUser) {
                 const statusRef = database.ref(`user_file_status/${currentUser.uid}_${fileId}`);
-                await statusRef.set(newWatched);
+                await statusRef.set(newWatchedCount);
                 
                 // Update user's total ads watched
                 await usersRef.child(currentUser.uid).child('adsWatched').transaction(current => (current || 0) + 1);
             } else {
-                localStorage.setItem(`ad_${fileId}`, newWatched);
+                localStorage.setItem(`ad_${fileId}`, newWatchedCount);
             }
 
-            // Show message if file is now unlocked
-            if (newWatched >= reqAds) {
-                showPopupMessage('🎉 File unlocked! You can now download.', 'success');
-            }
+            // Reload the page to show updated status
+            window.location.reload();
 
-            // Reload the page to show updated status after a short delay
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
-
-        } catch (error) {
-            console.error('Error updating watched count:', error);
-            showPopupMessage('Error updating ad count! Please try again.', 'error');
-        }
-    }
-
-    // Copy Page Link function - FIXED
-    window.copyPageLink = (btn, link) => {
-        // Try modern clipboard API first
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(link).then(() => {
-                showCopySuccess(btn);
-            }).catch(err => {
-                console.error('Clipboard API failed:', err);
-                fallbackCopy(btn, link);
-            });
-        } else {
-            fallbackCopy(btn, link);
+        } catch(e) {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            document.getElementById('dlStatus').innerText = "Ad failed to load. Please try again.";
+            console.error(e);
         }
     };
 
-    function fallbackCopy(btn, link) {
-        // Fallback method using textarea
-        const textarea = document.createElement('textarea');
-        textarea.value = link;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        textarea.setSelectionRange(0, 99999);
-        
-        try {
-            const successful = document.execCommand('copy');
-            if (successful) {
-                showCopySuccess(btn);
-            } else {
-                showCopyError(btn);
+    // loadMonetagScript function
+    function loadMonetagScript(zoneId) {
+        return new Promise((resolve, reject) => {
+            const scriptId = `monetag-script-${zoneId}`;
+            if (document.getElementById(scriptId)) {
+                return resolve();
             }
-        } catch (err) {
-            console.error('Fallback copy failed:', err);
-            showCopyError(btn);
-        }
-        
-        document.body.removeChild(textarea);
-    }
-
-    function showCopySuccess(btn) {
-        const originalIcon = btn.innerHTML;
-        btn.innerHTML = SVG_CHECK;
-        btn.style.borderColor = '#10b981';
-        btn.style.color = '#10b981';
-        
-        // Show status message
-        const status = document.getElementById('dlStatus');
-        if (status) {
-            status.innerText = 'Link copied!';
-            status.style.color = '#10b981';
-        }
-
-        // Also show popup
-        showPopupMessage('Link copied to clipboard!', 'success');
-        
-        setTimeout(() => {
-            btn.innerHTML = originalIcon;
-            btn.style.borderColor = '';
-            btn.style.color = '';
-            if (status) {
-                status.innerText = '';
-            }
-        }, 2000);
-    }
-
-    function showCopyError(btn) {
-        const status = document.getElementById('dlStatus');
-        if (status) {
-            status.innerText = 'Failed to copy. Select manually.';
-            status.style.color = '#ef4444';
-        }
-
-        showPopupMessage('Failed to copy link!', 'error');
-        
-        setTimeout(() => {
-            if (status) {
-                status.innerText = '';
-            }
-        }, 3000);
+            
+            const script = document.createElement('script');
+            script.id = scriptId;
+            script.src = 'https://libtl.com/sdk.js';
+            script.dataset.zone = zoneId;
+            script.dataset.sdk = `show_${zoneId}`;
+            script.onload = resolve;
+            script.onerror = () => {
+                console.warn('Monetag script failed to load, using fallback');
+                resolve(); // Still resolve to continue with fallback
+            };
+            document.body.appendChild(script);
+            
+            // Timeout fallback
+            setTimeout(resolve, 3000);
+        });
     }
 
     function initCarousel(innerId, dotsId, count, isHome) {
@@ -3174,8 +2756,9 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Description</label>
-                        <textarea id="upload-description" class="form-control" rows="4" placeholder="Describe your file" required></textarea>
+                        <label class="form-label">Description (Markdown supported)</label>
+                        <textarea id="upload-description" class="form-control" rows="4" placeholder="Describe your file. You can use Markdown for formatting and images." required></textarea>
+                        <div class="markdown-preview" id="uploadMarkdownPreview"></div>
                     </div>
                     
                     <div class="form-group">
@@ -3199,13 +2782,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Adsterra Direct Link (optional)</label>
-                        <input type="url" id="upload-adsterra" class="form-control" placeholder="https://example.com/ad">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label">Ad Wait Time (seconds)</label>
-                        <input type="number" id="upload-wait-time" class="form-control" value="${defaultAdWaitTime}" min="1" max="60">
+                        <label class="form-label">Monetag Zone ID (optional)</label>
+                        <input type="text" id="upload-zone" class="form-control" placeholder="e.g., 123456">
                     </div>
                     
                     <div class="form-group">
@@ -3219,6 +2797,26 @@
                 </form>
             </div>
         `;
+
+        // Markdown preview
+        const descInput = document.getElementById('upload-description');
+        const preview = document.getElementById('uploadMarkdownPreview');
+        
+        if (descInput && preview) {
+            descInput.addEventListener('input', () => {
+                preview.innerHTML = DOMPurify.sanitize(marked.parse(descInput.value));
+                // Make preview images clickable
+                setTimeout(() => {
+                    preview.querySelectorAll('img').forEach(img => {
+                        img.style.cursor = 'pointer';
+                        img.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openLightbox(img.src);
+                        });
+                    });
+                }, 100);
+            });
+        }
 
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -3234,8 +2832,7 @@
                 thumbnail_url: document.getElementById('upload-thumbnail').value,
                 download_url: document.getElementById('upload-download').value,
                 required_ads: parseInt(document.getElementById('upload-ads').value) || 0,
-                adsterra_link: document.getElementById('upload-adsterra').value,
-                ad_wait_time: parseInt(document.getElementById('upload-wait-time').value) || defaultAdWaitTime,
+                monitech_ad_id: document.getElementById('upload-zone').value,
                 detail_photos: document.getElementById('upload-photos').value.split(',').map(u => u.trim()).filter(u => u),
                 status: 'pending',
                 created_at: Date.now(),
@@ -3523,7 +3120,6 @@
                     <div class="admin-tab" onclick="switchAdminTab('banners')">Banners</div>
                     <div class="admin-tab" onclick="switchAdminTab('users')">Users</div>
                     <div class="admin-tab" onclick="switchAdminTab('notifications')">Notifications</div>
-                    <div class="admin-tab" onclick="switchAdminTab('settings')">Settings</div>
                 </div>
 
                 <div id="adminContent">
@@ -3554,9 +3150,6 @@
             case 'notifications':
                 loadAdminNotificationsTab();
                 break;
-            case 'settings':
-                loadAdminSettingsTab();
-                break;
         }
     };
 
@@ -3583,7 +3176,6 @@
                                 <th>Title</th>
                                 <th>Uploaded By</th>
                                 <th>Status</th>
-                                <th>Ads/Time</th>
                                 <th>Downloads</th>
                                 <th>Date</th>
                                 <th>Actions</th>
@@ -3599,7 +3191,6 @@
                                             ${file.status || 'pending'}
                                         </span>
                                     </td>
-                                    <td>${file.required_ads || 0} ads / ${file.ad_wait_time || defaultAdWaitTime}s</td>
                                     <td>${file.total_downloads || 0}</td>
                                     <td>${timeAgoShort(file.created_at)}</td>
                                     <td>
@@ -3823,6 +3414,16 @@
         if (descInput && preview) {
             descInput.addEventListener('input', () => {
                 preview.innerHTML = DOMPurify.sanitize(marked.parse(descInput.value));
+                // Make preview images clickable
+                setTimeout(() => {
+                    preview.querySelectorAll('img').forEach(img => {
+                        img.style.cursor = 'pointer';
+                        img.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openLightbox(img.src);
+                        });
+                    });
+                }, 100);
             });
         }
 
@@ -3847,50 +3448,6 @@
             `).join('');
         });
     }
-
-    function loadAdminSettingsTab() {
-        const content = document.getElementById('adminContent');
-        content.innerHTML = `
-            <div class="admin-section">
-                <div class="admin-section-header">
-                    <h2 class="admin-section-title">
-                        <i class="fas fa-cog" style="color: var(--primary);"></i>
-                        Site Settings
-                    </h2>
-                </div>
-
-                <div class="notification-sender">
-                    <div class="form-group">
-                        <label class="form-label">Default Ad Wait Time (seconds)</label>
-                        <input type="number" id="defaultAdWaitTime" class="form-control" value="${defaultAdWaitTime}" min="1" max="60">
-                        <small class="text-sub">This will be the default wait time for all new files.</small>
-                    </div>
-                    
-                    <button class="btn btn-primary" onclick="saveSettings()">
-                        <i class="fas fa-save"></i> Save Settings
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-
-    // Save Settings
-    window.saveSettings = async () => {
-        const newAdWaitTime = parseInt(document.getElementById('defaultAdWaitTime').value);
-        
-        if (newAdWaitTime < 1 || newAdWaitTime > 60) {
-            showPopupMessage('Ad wait time must be between 1 and 60 seconds!', 'error');
-            return;
-        }
-
-        try {
-            await settingsRef.child('adWaitTime').set(newAdWaitTime);
-            defaultAdWaitTime = newAdWaitTime;
-            showPopupMessage('Settings saved successfully!', 'success');
-        } catch (error) {
-            showPopupMessage('Error saving settings!', 'error');
-        }
-    };
 
     // Admin Actions
     window.approveFile = async (fileId) => {
@@ -4034,7 +3591,7 @@
         document.getElementById('notifLinkText').value = 'Click Here';
         document.getElementById('markdownPreview').innerHTML = '';
         
-        showPopupMessage('Notification sent!', 'success');
+        alert('Notification sent!');
         loadAdminNotificationsTab();
     };
 
@@ -4060,7 +3617,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Description</label>
+                    <label class="form-label">Description (Markdown supported)</label>
                     <textarea id="editDescription" class="form-control" rows="4" required>${file.description || ''}</textarea>
                 </div>
                 
@@ -4085,13 +3642,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Adsterra Direct Link</label>
-                    <input type="url" id="editAdsterra" class="form-control" value="${file.adsterra_link || ''}">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Ad Wait Time (seconds)</label>
-                    <input type="number" id="editWaitTime" class="form-control" value="${file.ad_wait_time || defaultAdWaitTime}" min="1" max="60">
+                    <label class="form-label">Monetag Zone ID</label>
+                    <input type="text" id="editZone" class="form-control" value="${file.monitech_ad_id || ''}">
                 </div>
                 
                 <div class="form-group">
@@ -4130,8 +3682,7 @@
                 thumbnail_url: document.getElementById('editThumbnail').value,
                 download_url: document.getElementById('editDownload').value,
                 required_ads: parseInt(document.getElementById('editAds').value) || 0,
-                adsterra_link: document.getElementById('editAdsterra').value,
-                ad_wait_time: parseInt(document.getElementById('editWaitTime').value) || defaultAdWaitTime,
+                monitech_ad_id: document.getElementById('editZone').value,
                 detail_photos: document.getElementById('editPhotos').value.split(',').map(u => u.trim()).filter(u => u)
             };
 
