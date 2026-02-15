@@ -384,19 +384,6 @@
 
         .detail-desc { margin-top: 25px; line-height: 1.8; color: var(--text-main); font-size: 1rem; }
         .detail-desc p { margin-bottom: 15px; }
-        .detail-desc img { 
-            max-width: 100%; 
-            border-radius: 12px; 
-            margin: 15px 0; 
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: var(--shadow-sm);
-        }
-        .detail-desc img:hover {
-            transform: scale(1.02);
-            box-shadow: var(--shadow-md);
-        }
-        
         .unlock-inline { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
         
         .unlock-actions {
@@ -1294,11 +1281,6 @@
             padding: 10px;
             border-radius: 8px;
             overflow-x: auto;
-        }
-        .markdown-preview img {
-            max-width: 100%;
-            border-radius: 8px;
-            margin: 10px 0;
         }
 
         /* Link Button */
@@ -2451,7 +2433,7 @@
         }
     }
 
-    // Detail Page with Markdown Support
+    // Detail Page
     async function renderDetail(type, id) {
         app.innerHTML = getDetailSkeleton();
 
@@ -2492,7 +2474,6 @@
                  carouselHTML = `<div class="carousel-wrap"><div class="slide"><img src="${item.thumbnail_url}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></div></div>`;
             }
 
-            // Parse description with Markdown
             const desc = DOMPurify.sanitize(marked.parse(item.description || 'No description available.'));
 
             app.innerHTML = `
@@ -2518,17 +2499,6 @@
                     <div class="detail-desc markdown-body">${desc}</div>
                     <div id="unlockSection" class="unlock-inline"></div>
                 </div>`;
-            
-            // Make all images in description clickable for lightbox
-            setTimeout(() => {
-                document.querySelectorAll('.detail-desc img').forEach(img => {
-                    img.style.cursor = 'pointer';
-                    img.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        openLightbox(img.src);
-                    });
-                });
-            }, 100);
             
             hljs.highlightAll();
             if (item.detail_photos && item.detail_photos.length > 1) {
@@ -2756,9 +2726,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Description (Markdown supported)</label>
-                        <textarea id="upload-description" class="form-control" rows="4" placeholder="Describe your file. You can use Markdown for formatting and images." required></textarea>
-                        <div class="markdown-preview" id="uploadMarkdownPreview"></div>
+                        <label class="form-label">Description</label>
+                        <textarea id="upload-description" class="form-control" rows="4" placeholder="Describe your file" required></textarea>
                     </div>
                     
                     <div class="form-group">
@@ -2797,26 +2766,6 @@
                 </form>
             </div>
         `;
-
-        // Markdown preview
-        const descInput = document.getElementById('upload-description');
-        const preview = document.getElementById('uploadMarkdownPreview');
-        
-        if (descInput && preview) {
-            descInput.addEventListener('input', () => {
-                preview.innerHTML = DOMPurify.sanitize(marked.parse(descInput.value));
-                // Make preview images clickable
-                setTimeout(() => {
-                    preview.querySelectorAll('img').forEach(img => {
-                        img.style.cursor = 'pointer';
-                        img.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            openLightbox(img.src);
-                        });
-                    });
-                }, 100);
-            });
-        }
 
         document.getElementById('upload-form').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -3414,16 +3363,6 @@
         if (descInput && preview) {
             descInput.addEventListener('input', () => {
                 preview.innerHTML = DOMPurify.sanitize(marked.parse(descInput.value));
-                // Make preview images clickable
-                setTimeout(() => {
-                    preview.querySelectorAll('img').forEach(img => {
-                        img.style.cursor = 'pointer';
-                        img.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            openLightbox(img.src);
-                        });
-                    });
-                }, 100);
             });
         }
 
@@ -3617,7 +3556,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Description (Markdown supported)</label>
+                    <label class="form-label">Description</label>
                     <textarea id="editDescription" class="form-control" rows="4" required>${file.description || ''}</textarea>
                 </div>
                 
