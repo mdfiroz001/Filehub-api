@@ -1,31 +1,17 @@
-
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#ffffff">
-    <meta name="description" content="FileHub Premium - Secure File Storage & Sharing Platform">
-    <meta name="keywords" content="file storage, secure downloads, premium resources, cloud sharing, file manager">
-    <meta name="author" content="FileHub Team">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://filehub-api.vercel.app/">
-    <meta property="og:title" content="FileHub Premium - Secure Storage & Sharing">
-    <meta property="og:description" content="Access and manage your premium files with FileHub. Fast, secure, and powered by AI.">
-    <meta property="og:image" content="https://iili.io/fY4mez7.jpg">
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://filehub-api.vercel.app/">
-    <meta property="twitter:title" content="FileHub Premium">
-    <meta property="twitter:description" content="The ultimate platform for secure file management and premium downloads.">
-    <meta property="twitter:image" content="https://iili.io/fY4mez7.jpg">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="google-site-verification" content="bkC0hqaxdTEmhPnCqJthesPf0tTlu42qHmNRGauItew" />
-    <link rel="icon" type="image/png" href="https://iili.io/fY4mez7.jpg">
-    <link rel="apple-touch-icon" href="https://iili.io/fY4mez7.jpg">
-    <link rel="manifest" href="/manifest.json">
-    <title>FileHub - Secure File Sharing</title>
+    <meta name="description" content="FileHub Premium - Telegram Mini App & Secure File Sharing">
+    <meta property="og:title" content="FileHub Premium">
+    <meta property="og:image" content="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png">
+    <link rel="icon" type="image/png" href="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png">
+    <title>FileHub - Telegram Mini App</title>
+
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -117,76 +103,33 @@
         }
 
         .markdown-body img, .detail-desc img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            display: block;
-            margin: 20px auto;
-            box-shadow: var(--shadow-sm);
+            max-width: 100%; height: auto; border-radius: 12px; display: block; margin: 20px auto; box-shadow: var(--shadow-sm);
         }
 
         .scrolling-notice-container {
-            background: var(--primary);
-            color: #ffffff;
-            padding: 8px 16px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            box-shadow: var(--shadow-md);
-            position: relative;
-            z-index: 10;
+            background: var(--primary); color: #ffffff; padding: 8px 16px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; overflow: hidden; border-radius: 12px; margin-bottom: 15px; box-shadow: var(--shadow-md); position: relative; z-index: 10;
         }
-        .scrolling-notice-container i {
-            margin-right: 10px;
-            font-size: 1rem;
-            flex-shrink: 0;
-            color: #facc15;
-        }
+        .scrolling-notice-container i { margin-right: 10px; font-size: 1rem; flex-shrink: 0; color: #facc15; }
 
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton {
-            background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 6px;
-        }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
         .sk-img { width: 100%; aspect-ratio: 16/9; border-radius: 12px; margin-bottom: 10px; }
         .sk-title { height: 20px; width: 80%; margin-bottom: 8px; }
         .sk-text { height: 14px; width: 60%; }
         
-        header { 
-            background: var(--surface); border-bottom: 1px solid var(--border); 
-            position: sticky; top: 0; z-index: 1000; height: 65px; display: flex; align-items: center;
-        }
+        header { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; height: 65px; display: flex; align-items: center; }
         .header-content { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 20px; position: relative; height: 100%; display: flex; align-items: center; }
         .header-main { width: 100%; display: flex; justify-content: space-between; align-items: center; }
-        
         .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; cursor: pointer; }
         .brand-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; border: 2px solid var(--surface); box-shadow: 0 0 0 2px var(--primary-soft); }
         .brand-text { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 700; color: var(--text-main); }
-
         .header-actions { display: flex; align-items: center; gap: 4px; }
         .icon-btn { background: transparent; border: none; padding: 8px; border-radius: 50%; color: var(--text-sub); display: flex; cursor: pointer; transition: 0.2s; align-items: center; justify-content: center; position: relative; }
         .icon-btn:hover { background: var(--bg); color: var(--text-main); }
         .icon-btn svg { width: 22px; height: 22px; }
         .ai-icon-img { width: 26px; height: 26px; border-radius: 50%; object-fit: contain; }
         
-        .notif-badge {
-            position: absolute; top: 5px; right: 5px;
-            background: #ef4444; color: white;
-            font-size: 0.65rem; font-weight: 700;
-            width: 16px; height: 16px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid var(--surface);
-            display: none;
-        }
+        .notif-badge { position: absolute; top: 5px; right: 5px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: 700; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--surface); display: none; }
         .notif-badge.active { display: flex; }
 
         .search-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--surface); display: flex; align-items: center; padding: 0 15px; transform: scaleX(0); transform-origin: right; transition: transform 0.3s; z-index: 10; box-sizing: border-box; }
@@ -336,17 +279,7 @@
         .upload-form, .auth-form, .edit-profile-form { max-width: 500px; margin: 0 auto; background: var(--surface); padding: 40px; border-radius: 24px; box-shadow: var(--shadow-md); }
 
         .upload-notice {
-            background: #fffbeb;
-            border-left: 4px solid #f59e0b;
-            padding: 16px;
-            border-radius: 8px;
-            margin-top: 20px;
-            color: #92400e;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            display: flex;
-            gap: 10px;
-            align-items: flex-start;
+            background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-top: 20px; color: #92400e; font-size: 0.95rem; line-height: 1.5; display: flex; gap: 10px; align-items: flex-start;
         }
         .upload-notice i { font-size: 1.2rem; color: #f59e0b; margin-top: 2px; }
         [data-theme="dark"] .upload-notice { background: rgba(245, 158, 11, 0.1); color: #fde68a; }
@@ -440,7 +373,7 @@
     <div class="header-content">
         <div class="header-main" id="headerMain">
             <div class="brand" onclick="navigateTo('/')">
-                <img src="https://iili.io/fY4mez7.jpg" alt="Profile" class="brand-img" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+                <img src="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png" alt="Profile" class="brand-img" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'">
                 <span class="brand-text">FileHub</span>
             </div>
             <div class="header-actions">
@@ -571,6 +504,13 @@
 </nav>
 
 <script>
+    // Telegram Web App Auto Initialization & Sync
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+    }
+
     // Firebase Configuration
     const firebaseConfig = {
         apiKey: "AIzaSyChHkWz0MLat5pWVu2P8h85O2zxr845hdk",
@@ -747,7 +687,38 @@
         if (currentUser) usersRef.child(currentUser.uid).child('theme').set(next).catch(console.warn);
     });
 
-    // Auth
+    // Telegram User Auto Authentication
+    async function checkTelegramAutoAuth() {
+        const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+        if (tgUser && !currentUser) {
+            const tgEmail = `tg_${tgUser.id}@filehub.app`;
+            const tgPassword = `tg_pass_${tgUser.id}_secret`;
+
+            try {
+                await auth.signInWithEmailAndPassword(tgEmail, tgPassword);
+            } catch (err) {
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(tgEmail, tgPassword);
+                    const numericId = tgUser.id.toString();
+                    await usersRef.child(userCredential.user.uid).set({
+                        email: tgEmail,
+                        fullname: `${tgUser.first_name || ''} ${tgUser.last_name || ''}`.trim() || 'Telegram User',
+                        username: tgUser.username || `tg_${tgUser.id}`,
+                        numericId: numericId,
+                        isAccountActive: true,
+                        balance: 0,
+                        adsWatched: 0,
+                        createdAt: Date.now(),
+                        theme: 'light',
+                        isTelegramUser: true,
+                        telegramId: tgUser.id
+                    });
+                } catch(e) { console.error("Telegram Auto Auth Error:", e); }
+            }
+        }
+    }
+
+    // Auth Change Listener
     auth.onAuthStateChanged(async (user) => {
         if (user && !user.isAnonymous) {
             currentUser = user;
@@ -777,6 +748,7 @@
             allNotifications = [];
             updateBadge();
             router();
+            checkTelegramAutoAuth();
         }
     });
 
@@ -792,7 +764,7 @@
         document.getElementById('authModalContent').innerHTML = `
             <div class="auth-form p-0">
                 <div class="auth-header">
-                    <img src="https://iili.io/fY4mez7.jpg" class="auth-logo" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+                    <img src="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png" class="auth-logo" onerror="this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'">
                     <h1 class="auth-title">Welcome to FileHub</h1>
                     <p class="auth-subtitle">Secure file storage & sharing platform</p>
                 </div>
@@ -840,7 +812,7 @@
             registerFields.classList.remove('hidden');
             authBtn.innerHTML = '<i class="fas fa-user-plus mr-2"></i> Register';
         } else {
-            registerFields.add('hidden');
+            registerFields.classList.add('hidden');
             authBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Login';
         }
     };
@@ -1194,7 +1166,7 @@ RULES FOR AI:
                     <div class="carousel-inner" id="homeInner">
                         ${allBanners.map(b => `
                             <div class="slide" onclick="navigateTo('/banner/${b.id}')">
-                                <img src="${b.thumbnail_url || ''}" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+                                <img src="${b.thumbnail_url || ''}" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'">
                                 <div class="center-eye"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg></div>
                                 <div class="slide-overlay">
                                     <span class="banner-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>${truncateExt(b.file_extension)}</span>
@@ -1209,7 +1181,7 @@ RULES FOR AI:
 
             let filesHTML = approvedFiles.length ? approvedFiles.map(f => `
                 <div class="file-card">
-                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='" onclick="openLightbox(this.src); event.stopPropagation();">
+                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'" onclick="openLightbox(this.src); event.stopPropagation();">
                     <div class="card-body" onclick="navigateTo('/file/${f.id}')">
                         <div class="card-title">${f.title || 'Untitled'}</div>
                         <div class="card-footer">
@@ -1260,12 +1232,12 @@ RULES FOR AI:
                 carouselHTML = `
                 <div class="carousel-wrap" id="detailWrap">
                     <div class="carousel-inner" id="detailInner">
-                        ${item.detail_photos.map(u => `<div class="slide"><img src="${u}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></div>`).join('')}
+                        ${item.detail_photos.map(u => `<div class="slide"><img src="${u}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'"></div>`).join('')}
                     </div>
                 </div>
                 <div class="carousel-dots" id="detailDots">${dots}</div>`;
             } else if (item.thumbnail_url) {
-                 carouselHTML = `<div class="carousel-wrap"><div class="slide"><img src="${item.thumbnail_url}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></div></div>`;
+                 carouselHTML = `<div class="carousel-wrap"><div class="slide"><img src="${item.thumbnail_url}" onclick="openLightbox(this.src)" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'"></div></div>`;
             }
 
             const desc = DOMPurify.sanitize(marked.parse(item.description || 'No description available.'));
@@ -1278,7 +1250,7 @@ RULES FOR AI:
                         <div class="detail-meta-grid">
                             <span class="meta-pill meta-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>${item.file_extension || 'file'}</span>
                             <span class="meta-pill meta-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>${formatCount(item.total_downloads || 0)}</span>
-                            <span class="meta-pill meta-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 16 14"></polyline></svg>${timeAgoShort(item.created_at)}</span>
+                            <span class="meta-pill meta-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${timeAgoShort(item.created_at)}</span>
                         </div>
                     </div>
                     <div class="detail-desc markdown-body">${desc}</div>
@@ -1545,7 +1517,7 @@ RULES FOR AI:
 
         const username = currentUserData?.username || 'username';
         const fullname = currentUserData?.fullname || currentUser.displayName || 'User';
-        const avatar = currentUserData?.avatar || 'https://iili.io/fY4mez7.jpg';
+        const avatar = currentUserData?.avatar || 'https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png';
         const isActive = currentUserData?.isAccountActive !== false;
         const displayId = currentUserData?.numericId || currentUser.uid.substring(0,10);
 
@@ -1553,7 +1525,7 @@ RULES FOR AI:
             <div class="profile-container">
                 <div class="profile-header">
                     <div class="profile-avatar-wrapper">
-                        <img src="${avatar}" class="profile-avatar" id="profileAvatar" onclick="openLightbox(this.src)" onerror="this.src='https://iili.io/fY4mez7.jpg'">
+                        <img src="${avatar}" class="profile-avatar" id="profileAvatar" onclick="openLightbox(this.src)" onerror="this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'">
                         <div class="profile-avatar-edit" onclick="editAvatar()"><i class="fas fa-camera"></i></div>
                     </div>
                     <div class="profile-info">
@@ -1611,7 +1583,7 @@ RULES FOR AI:
                             
                             return `
                                 <div class="file-card" onclick="navigateTo('/file/${f.id}')">
-                                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
+                                    <img src="${f.thumbnail_url || ''}" class="card-thumb" onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png'">
                                     <div class="card-body">
                                         <div class="card-title">${f.title || 'Untitled'}</div>
                                         <div class="card-footer">
@@ -1751,4 +1723,3 @@ RULES FOR AI:
     router();
 </script>
 </body>
-</html>
