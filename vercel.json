@@ -1,5 +1,27 @@
 {
+  "version": 2,
+  "cleanUrls": true,
   "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/file/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/banner/(.*)",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/upload",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/profile",
+      "destination": "/index.html"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
