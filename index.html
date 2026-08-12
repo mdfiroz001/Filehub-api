@@ -19,7 +19,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-    <!-- Default Gigapub Ad Script (Fallback) -->
+    <!-- Default Gigapub Ad Script Placeholder -->
     <script id="gigapub-sdk-script" src="https://ad.gigapub.tech/script?id=6948" async></script>
 
     <script>
@@ -508,7 +508,7 @@
 </nav>
 
 <script>
-    // Telegram Web App Auto Initialization & Deep Link Routing
+    // Telegram Web App Auto Initialization & Deep Link Routing (Fixes "Content Not Found")
     function checkTelegramDeepLink() {
         const tg = window.Telegram?.WebApp;
         if (tg) {
@@ -530,9 +530,10 @@
         }
 
         if (startParam && startParam.startsWith('file_')) {
-            const targetFileId = startParam.replace('file_', '');
+            // Safely decode DASH back to hyphen (-)
+            let targetFileId = startParam.replace('file_', '').replace(/DASH/g, '-').trim();
+            console.log("Opening Telegram shared file ID:", targetFileId);
             if (targetFileId) {
-                console.log("Opening Telegram shared file:", targetFileId);
                 setTimeout(() => {
                     navigateTo(`/file/${targetFileId}`);
                 }, 400);
@@ -1041,7 +1042,7 @@
     chatSendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-    // REAL-TIME OPENAI / GROQ AI INTEGRATION
+    // REAL-TIME OPENAI / GROQ AI INTEGRATION WITH FRIENDLY PERSONALITY
     async function sendMessage() {
         const text = chatInput.value.trim(); if(!text) return;
         chatInput.value = ''; chatInput.style.height = 'auto';
@@ -1079,7 +1080,7 @@
                     downloads: item.total_downloads || 0,
                     required_ads: item.required_ads || 0,
                     status: item.status,
-                    bot_share_link: `https://t.me/File_hub_abc_bot?startapp=file_${id}`
+                    bot_share_link: `https://t.me/File_hub_abc_bot?startapp=file_${id.replace(/-/g, 'DASH')}`
                 }))
                 .filter(f => f.status === 'approved');
 
@@ -1107,7 +1108,7 @@ ${JSON.stringify(approvedFilesList, null, 2)}
 
 INSTRUCTIONS FOR AI:
 1. Always be warm and polite in Bengali.
-2. If the user asks for a file or query, find it in the files database and share its Telegram Bot link in Markdown: [File Title](https://t.me/File_hub_abc_bot?startapp=file_FILE_ID).
+2. If the user asks for a file or query, find it in the files database and share its Telegram Bot link in Markdown: [File Title](https://t.me/File_hub_abc_bot?startapp=file_SAFE_FILE_ID).
 3. Explain site rules, how to download files after watching required ads, or user stats if asked.`;
 
             const apiResponse = await fetch(apiUrl, {
@@ -1339,9 +1340,10 @@ INSTRUCTIONS FOR AI:
         }
     }
 
-    // Copy Direct Telegram Bot Link
+    // Copy Direct Telegram Bot Link (With Safe Encoding for Telegram)
     window.copyTelegramBotLink = (btn, itemId) => {
-        const shareUrl = `https://t.me/File_hub_abc_bot?startapp=file_${itemId}`;
+        const safeItemId = itemId.replace(/-/g, 'DASH');
+        const shareUrl = `https://t.me/File_hub_abc_bot?startapp=file_${safeItemId}`;
         navigator.clipboard.writeText(shareUrl).then(() => {
             const originalIcon = btn.innerHTML;
             btn.innerHTML = SVG_CHECK; btn.style.borderColor = '#10b981'; btn.style.color = '#10b981';
@@ -1357,7 +1359,7 @@ INSTRUCTIONS FOR AI:
         return new Promise((resolve) => {
             const idToUse = zoneId || '6948';
             const scriptId = `gigapub-sdk-script`;
-            const existingScript = document.getElementById(scriptId);
+            let existingScript = document.getElementById(scriptId);
 
             if (existingScript && typeof window.showGiga === 'function') {
                 return resolve();
@@ -1377,7 +1379,7 @@ INSTRUCTIONS FOR AI:
                     if (typeof window.showGiga === 'function') {
                         clearInterval(interval);
                         resolve();
-                    } else if (checkCount > 15) {
+                    } else if (checkCount > 20) {
                         clearInterval(interval);
                         resolve();
                     }
@@ -1390,7 +1392,7 @@ INSTRUCTIONS FOR AI:
     }
 
     function playGigaPub(zoneId) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             const idToUse = zoneId || '6948';
             try {
                 await ensureGigapubScriptLoaded(idToUse);
@@ -1400,18 +1402,18 @@ INSTRUCTIONS FOR AI:
                     if (result && typeof result.then === 'function') {
                         result
                             .then(() => {
-                                console.log("Gigapub ad completed.");
+                                console.log("Gigapub ad completed successfully.");
                                 resolve(true);
                             })
                             .catch((err) => {
                                 console.error("Gigapub error:", err);
-                                resolve(true); // Fallback so user isn't locked out
+                                resolve(true); // Don't lock user if ad is closed
                             });
                     } else {
                         resolve(true);
                     }
                 } else {
-                    console.warn("showGiga function not found, bypassing.");
+                    console.warn("showGiga function missing.");
                     resolve(true);
                 }
             } catch (e) {
@@ -1455,12 +1457,12 @@ INSTRUCTIONS FOR AI:
         });
     }
 
-    // Alternating Ad Network Trigger Strategy
+    // Ad Network Trigger Logic (Monetag First -> 15 Seconds Timer -> GigaPub Second)
     window.triggerAd = async (fileId, currentWatched, reqAds) => {
         const btn = document.querySelector('.unlock-btn');
         if(!btn) return;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+        const statusEl = document.getElementById('dlStatus');
         btn.disabled = true;
 
         try {
@@ -1471,31 +1473,36 @@ INSTRUCTIONS FOR AI:
             let adSuccess = false;
 
             if (activeNetwork === 'gigapub') {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading GigaPub Ad...';
                 adSuccess = await playGigaPub(gigapubZone);
-            } else if (activeNetwork === 'monetag') {
-                adSuccess = await playMonetag(monetagZone);
-            } else if (activeNetwork === 'both') {
-                // Alternating Strategy: Even count -> Gigapub, Odd count -> Monetag
-                const tryGigapubFirst = (currentWatched % 2 === 0);
 
-                if (tryGigapubFirst) {
-                    try {
-                        adSuccess = await playGigaPub(gigapubZone);
-                    } catch (e) {
-                        console.warn("Gigapub failed, switching to Monetag fallback...", e);
-                        adSuccess = await playMonetag(monetagZone);
-                    }
-                } else {
-                    try {
-                        adSuccess = await playMonetag(monetagZone);
-                    } catch (e) {
-                        console.warn("Monetag failed, switching to Gigapub fallback...", e);
-                        adSuccess = await playGigaPub(gigapubZone);
-                    }
+            } else if (activeNetwork === 'monetag') {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Monetag Ad...';
+                adSuccess = await playMonetag(monetagZone);
+
+            } else if (activeNetwork === 'both') {
+                // Step 1: Monetag Ad First
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> [1/2] Loading Monetag Ad...';
+                if (statusEl) statusEl.innerText = "Step 1 of 2: Watching Monetag Ad...";
+                
+                await playMonetag(monetagZone);
+
+                // Step 2: 15 Seconds Countdown Timer
+                if (statusEl) statusEl.innerText = "Monetag Ad finished! Next Ad (GigaPub) in 15s...";
+                
+                for (let sec = 15; sec > 0; sec--) {
+                    btn.innerHTML = `<i class="fas fa-clock fa-spin"></i> Next Ad in ${sec}s...`;
+                    await new Promise(r => setTimeout(r, 1000));
                 }
+
+                // Step 3: GigaPub Ad Second
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> [2/2] Loading GigaPub Ad...';
+                if (statusEl) statusEl.innerText = "Step 2 of 2: Watching GigaPub Ad...";
+
+                adSuccess = await playGigaPub(gigapubZone);
             }
 
-            if (!adSuccess) throw new Error("Ad failed to play.");
+            if (!adSuccess && activeNetwork !== 'both') throw new Error("Ad failed to play.");
 
             const newWatchedCount = currentWatched + 1;
             if (currentUser) {
@@ -1517,7 +1524,6 @@ INSTRUCTIONS FOR AI:
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
-            const statusEl = document.getElementById('dlStatus');
             if(statusEl) statusEl.innerText = "⚠️ Ad failed to load. Please try again.";
             console.error(e);
         }
