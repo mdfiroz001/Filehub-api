@@ -19,9 +19,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
-    <!-- GigaPub SDK -->
-    <script src="https://gigapub.com/sdk.js" async></script>
-
     <script>
         (function() {
             try {
@@ -508,19 +505,36 @@
 </nav>
 
 <script>
-    // Telegram Web App Auto Initialization & Deep Link
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-        tg.ready();
-        tg.expand();
+    // Telegram Web App Auto Initialization & Deep Link Routing
+    function checkTelegramDeepLink() {
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
 
-        // Handle Telegram Deep Link (start_param)
-        const startParam = tg.initDataUnsafe?.start_param;
+        let startParam = tg?.initDataUnsafe?.start_param;
+
+        // URL fallback for start parameters
+        if (!startParam) {
+            const urlParams = new URLSearchParams(window.location.search);
+            startParam = urlParams.get('tgWebAppStartParam') || urlParams.get('startapp') || urlParams.get('start');
+        }
+
+        if (!startParam && window.location.hash) {
+            const hashStr = window.location.hash.replace('#', '');
+            const hashParams = new URLSearchParams(hashStr);
+            startParam = hashParams.get('tgWebAppStartParam');
+        }
+
         if (startParam && startParam.startsWith('file_')) {
             const targetFileId = startParam.replace('file_', '');
-            setTimeout(() => {
-                navigateTo(`/file/${targetFileId}`);
-            }, 600);
+            if (targetFileId) {
+                console.log("Opening Telegram shared file:", targetFileId);
+                setTimeout(() => {
+                    navigateTo(`/file/${targetFileId}`);
+                }, 400);
+            }
         }
     }
 
@@ -754,13 +768,13 @@
             
             loadNotifications();
             loadChatHistory();
-            router();
+            router().then(() => checkTelegramDeepLink());
         } else {
             currentUser = null;
             currentUserData = null;
             allNotifications = [];
             updateBadge();
-            router();
+            router().then(() => checkTelegramDeepLink());
             checkTelegramAutoAuth();
         }
     });
@@ -1323,75 +1337,70 @@ INSTRUCTIONS FOR AI:
         }
     }
 
-    // Copy Direct Telegram Bot MiniApp Link
+    // Copy Direct Telegram Bot Link
     window.copyTelegramBotLink = (btn, itemId) => {
-        const telegramBotShareUrl = `https://t.me/File_hub_abc_bot?startapp=file_${itemId}`;
-        navigator.clipboard.writeText(telegramBotShareUrl).then(() => {
+        const shareUrl = `https://t.me/File_hub_abc_bot?startapp=file_${itemId}`;
+        navigator.clipboard.writeText(shareUrl).then(() => {
             const originalIcon = btn.innerHTML;
             btn.innerHTML = SVG_CHECK; btn.style.borderColor = '#10b981'; btn.style.color = '#10b981';
             setTimeout(() => { btn.innerHTML = originalIcon; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
-        }).catch(() => { document.getElementById('dlStatus').innerText = 'Failed to copy link.'; });
+        }).catch(() => { 
+            const el = document.getElementById('dlStatus');
+            if(el) el.innerText = 'Failed to copy link.'; 
+        });
     };
 
-    // Ad Network Integration (WITHOUT RELOADING PAGE)
-    window.triggerAd = async (fileId, currentWatched, reqAds) => {
-        const btn = document.querySelector('.unlock-btn');
-        if(!btn) return;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
-        btn.disabled = true;
+    // Dynamic Gigapub Ad Script Injector
+    function loadGigapubScript(zoneId) {
+        return new Promise((resolve) => {
+            const scriptId = `gigapub-script-${zoneId}`;
+            if (document.getElementById(scriptId)) return resolve();
 
-        try {
-            const activeNetwork = appSettings.ads?.activeNetwork || 'monetag';
-            const monetagZone = appSettings.ads?.monetagZone || '';
-            const gigapubZone = appSettings.ads?.gigapubZone || '';
+            const script = document.createElement('script');
+            script.id = scriptId;
+            script.src = `https://ad.gigapub.tech/script?id=${zoneId}`;
+            script.async = true;
+            script.onload = () => setTimeout(resolve, 300);
+            script.onerror = () => resolve();
+            document.head.appendChild(script);
+        });
+    }
 
-            let adSuccess = false;
+    function playGigaPub(zoneId) {
+        return new Promise(async (resolve) => {
+            if (!zoneId) {
+                console.warn("Gigapub zone ID is not configured.");
+                return resolve(true);
+            }
+            try {
+                await loadGigapubScript(zoneId);
 
-            if (activeNetwork === 'monetag') {
-                adSuccess = await playMonetag(monetagZone);
-            } else if (activeNetwork === 'gigapub') {
-                adSuccess = await playGigaPub(gigapubZone);
-            } else if (activeNetwork === 'both') {
-                try {
-                    adSuccess = await playMonetag(monetagZone);
-                } catch (e) {
-                    console.warn("Monetag failed, falling back to GigaPub...");
-                    adSuccess = await playGigaPub(gigapubZone);
+                if (typeof window.showGiga === "function") {
+                    const result = window.showGiga();
+                    if (result && typeof result.then === "function") {
+                        result.then(() => resolve(true)).catch((e) => {
+                            console.error("Gigapub error:", e);
+                            resolve(true);
+                        });
+                    } else {
+                        resolve(true);
+                    }
+                } else if (typeof window.watchGigapubAd === "function") {
+                    window.watchGigapubAd();
+                    resolve(true);
+                } else {
+                    console.warn("Gigapub showGiga function missing.");
+                    resolve(true);
                 }
+            } catch (e) {
+                console.error("Gigapub exception:", e);
+                resolve(true);
             }
-
-            if (!adSuccess) throw new Error("Ad failed to play.");
-
-            // Update DB without page refresh
-            const newWatchedCount = currentWatched + 1;
-            if (currentUser) {
-                const statusRef = database.ref(`user_file_status/${currentUser.uid}_${fileId}`);
-                await statusRef.set(newWatchedCount);
-                await usersRef.child(currentUser.uid).child('adsWatched').transaction(c => (c || 0) + 1);
-            } else {
-                localStorage.setItem(`ad_${fileId}`, newWatchedCount);
-            }
-
-            // In-memory re-render without 404 reload!
-            const fileSnap = await filesRef.child(fileId).once('value');
-            if(fileSnap.exists()) {
-                renderUnlockLogic('file', { id: fileId, ...fileSnap.val() }, newWatchedCount);
-            }
-
-        } catch(e) {
-            if(btn) {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-            const statusEl = document.getElementById('dlStatus');
-            if(statusEl) statusEl.innerText = "⚠️ Ad failed to load. Please try again.";
-            console.error(e);
-        }
-    };
+        });
+    }
 
     function playMonetag(zoneId) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve) => {
             if (!zoneId) return resolve(true);
             try {
                 await loadMonetagScript(zoneId);
@@ -1402,24 +1411,7 @@ INSTRUCTIONS FOR AI:
                     setTimeout(() => resolve(true), 1500); 
                 }
             } catch (e) {
-                reject(e);
-            }
-        });
-    }
-
-    function playGigaPub(zoneId) {
-        return new Promise((resolve, reject) => {
-            if (typeof window.showGiga === 'function') {
-                window.showGiga()
-                    .then(() => resolve(true))
-                    .catch(() => resolve(true)); // Fallback resolve to prevent user lockout
-            } else if (typeof window.GigaPub === 'object' && typeof window.GigaPub.show === 'function') {
-                window.GigaPub.show()
-                    .then(() => resolve(true))
-                    .catch(() => resolve(true));
-            } else {
-                console.warn("GigaPub SDK not detected, skipping smoothly.");
-                setTimeout(() => resolve(true), 1200);
+                resolve(true);
             }
         });
     }
@@ -1440,6 +1432,62 @@ INSTRUCTIONS FOR AI:
             setTimeout(resolve, 3000);
         });
     }
+
+    // Ad Network Integration (In-Memory Unlocking Without Page Refresh)
+    window.triggerAd = async (fileId, currentWatched, reqAds) => {
+        const btn = document.querySelector('.unlock-btn');
+        if(!btn) return;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+        btn.disabled = true;
+
+        try {
+            const activeNetwork = appSettings.ads?.activeNetwork || 'monetag';
+            const monetagZone = appSettings.ads?.monetagZone || '';
+            const gigapubZone = appSettings.ads?.gigapubZone || '';
+
+            let adSuccess = false;
+
+            if (activeNetwork === 'gigapub') {
+                adSuccess = await playGigaPub(gigapubZone);
+            } else if (activeNetwork === 'monetag') {
+                adSuccess = await playMonetag(monetagZone);
+            } else if (activeNetwork === 'both') {
+                try {
+                    adSuccess = await playGigaPub(gigapubZone);
+                } catch (e) {
+                    console.warn("Gigapub failed, trying Monetag...");
+                    adSuccess = await playMonetag(monetagZone);
+                }
+            }
+
+            if (!adSuccess) throw new Error("Ad failed to play.");
+
+            const newWatchedCount = currentWatched + 1;
+            if (currentUser) {
+                const statusRef = database.ref(`user_file_status/${currentUser.uid}_${fileId}`);
+                await statusRef.set(newWatchedCount);
+                await usersRef.child(currentUser.uid).child('adsWatched').transaction(c => (c || 0) + 1);
+            } else {
+                localStorage.setItem(`ad_${fileId}`, newWatchedCount);
+            }
+
+            // In-memory UI update (No 404 Reloads!)
+            const fileSnap = await filesRef.child(fileId).once('value');
+            if(fileSnap.exists()) {
+                renderUnlockLogic('file', { id: fileId, ...fileSnap.val() }, newWatchedCount);
+            }
+
+        } catch(e) {
+            if(btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+            const statusEl = document.getElementById('dlStatus');
+            if(statusEl) statusEl.innerText = "⚠️ Ad failed to load. Please try again.";
+            console.error(e);
+        }
+    };
 
     function initCarousel(innerId, dotsId, count, isHome) {
         const inner = document.getElementById(innerId); const dots = document.getElementById(dotsId)?.children;
@@ -1755,7 +1803,7 @@ INSTRUCTIONS FOR AI:
 
     initTheme();
     window.addEventListener('popstate', router);
-    router();
+    router().then(() => checkTelegramDeepLink());
 </script>
 </body>
 </html>
