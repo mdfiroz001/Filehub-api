@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
@@ -17,6 +18,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
+    <!-- GigaPub SDK -->
+    <script src="https://gigapub.com/sdk.js" async></script>
 
     <script>
         (function() {
@@ -465,7 +469,7 @@
     <div class="chat-container" id="chatList">
         <div class="chat-bubble ai">
             <img src="https://iili.io/fYWPWg9.jpg" class="ai-avatar" id="aiAvatar" onerror="this.onerror=null;this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
-            <div class="ai-content">হ্যালো! আমি আপনার FileHub AI অ্যাসিস্ট্যান্ট। ফাইল খুঁজে পেতে বা যেকোনো প্রশ্ন করতে মেসেজ দিন।</div>
+            <div class="ai-content">হ্যালো বন্ধু! আমি আপনার ফাইলহাব এআই অ্যাসিস্ট্যান্ট। ফাইল খোঁজা বা সাইটের যেকোনো তথ্যের জন্য আমাকে জিজ্ঞেস করুন! 😊</div>
         </div>
     </div>
     <div class="chat-footer">
@@ -504,11 +508,20 @@
 </nav>
 
 <script>
-    // Telegram Web App Auto Initialization & Sync
+    // Telegram Web App Auto Initialization & Deep Link
     const tg = window.Telegram?.WebApp;
     if (tg) {
         tg.ready();
         tg.expand();
+
+        // Handle Telegram Deep Link (start_param)
+        const startParam = tg.initDataUnsafe?.start_param;
+        if (startParam && startParam.startsWith('file_')) {
+            const targetFileId = startParam.replace('file_', '');
+            setTimeout(() => {
+                navigateTo(`/file/${targetFileId}`);
+            }, 600);
+        }
     }
 
     // Firebase Configuration
@@ -1012,7 +1025,7 @@
     chatSendBtn.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
 
-    // REAL-TIME OPENAI / GROQ AI INTEGRATION
+    // REAL-TIME OPENAI / GROQ AI INTEGRATION WITH FRIENDLY PERSONALITY
     async function sendMessage() {
         const text = chatInput.value.trim(); if(!text) return;
         chatInput.value = ''; chatInput.style.height = 'auto';
@@ -1050,27 +1063,36 @@
                     downloads: item.total_downloads || 0,
                     required_ads: item.required_ads || 0,
                     status: item.status,
-                    page_url: `/file/${id}`
+                    bot_share_link: `https://t.me/File_hub_abc_bot?startapp=file_${id}`
                 }))
                 .filter(f => f.status === 'approved');
 
             const currentNotice = settingsVal.app?.scrollingNotice || "None";
+            const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
 
-            const systemPrompt = `You are FileHub AI, an intelligent assistant for the FileHub website. You have real-time access to the site's database and dynamic contents.
+            const systemPrompt = `You are FileHub AI, a super friendly, warm, and helpful best friend on FileHub Telegram Mini App.
+
+YOUR PERSONALITY & TONE:
+- Talk like a very close, polite, and caring friend in natural Bengali (বন্ধুত্বপূর্ণ, আন্তরিক ও হেল্পফুল ভাষায় কথা বলবে)।
+- Use friendly emojis 😊🚀❤️
+- Address the user warmly (যেমন: "হেঁ বন্ধু", "অবশ্যই!", "চিন্তা করো না, আমি সাহায্য করছি")।
+
+REAL-TIME USER DETAILS:
+- Full Name: ${currentUserData?.fullname || tgUser?.first_name || 'Friend'}
+- Email/Account: ${currentUser?.email || tgUser?.id || 'Guest'}
+- User Telegram ID: ${tgUser?.id || 'N/A'}
+- Unique User ID: ${currentUserData?.numericId || 'N/A'}
+- Ads Watched: ${currentUserData?.adsWatched || 0}
 
 DATABASE REAL-TIME KNOWLEDGE:
 - Website Notice: "${currentNotice}"
 - Active Approved Files (${approvedFilesList.length} files):
 ${JSON.stringify(approvedFilesList, null, 2)}
 
-CURRENT USER INFORMATION:
-- Full Name: ${currentUserData?.fullname || 'Guest'}
-- Email: ${currentUser?.email || 'Not logged in'}
-
-RULES FOR AI:
-1. Help users find files, explain site rules, or explain how to download.
-2. When mentioning a file, ALWAYS provide a Markdown link like: [File Name](/file/FILE_ID).
-3. Be helpful, concise, friendly, and speak in Bengali (or the language user speaks).`;
+INSTRUCTIONS FOR AI:
+1. Always be warm and polite in Bengali.
+2. If the user asks for a file or query, find it in the files database and share its Telegram Bot link in Markdown: [File Title](https://t.me/File_hub_abc_bot?startapp=file_FILE_ID).
+3. Explain site rules, how to download files after watching required ads, or user stats if asked.`;
 
             const apiResponse = await fetch(apiUrl, {
                 method: "POST",
@@ -1099,7 +1121,7 @@ RULES FOR AI:
                 }
             } else {
                 const errorMsg = responseData.error?.message || responseData.message || `HTTP ${apiResponse.status} Error`;
-                const errReply = `⚠️ **API Error:** ${errorMsg}\n\n*পরামর্শ:* OpenAI অ্যাকাউন্টে $5 ক্রেডিট না থাকলে Insufficient Quota দেখায়। সম্পূর্ণ বিনামূল্যে Groq API (console.groq.com) ব্যবহার করতে পারেন।`;
+                const errReply = `⚠️ **API Error:** ${errorMsg}\n\n*পরামর্শ:* Groq API (console.groq.com) এর সম্পূর্ণ ফ্রি Key এডমিন প্যানেলে বসাতে পারেন।`;
                 appendMessage('ai', errReply);
             }
 
@@ -1250,7 +1272,7 @@ RULES FOR AI:
                         <div class="detail-meta-grid">
                             <span class="meta-pill meta-left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>${item.file_extension || 'file'}</span>
                             <span class="meta-pill meta-center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>${formatCount(item.total_downloads || 0)}</span>
-                            <span class="meta-pill meta-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>${timeAgoShort(item.created_at)}</span>
+                            <span class="meta-pill meta-right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 16 14"></polyline></svg>${timeAgoShort(item.created_at)}</span>
                         </div>
                     </div>
                     <div class="detail-desc markdown-body">${desc}</div>
@@ -1267,6 +1289,7 @@ RULES FOR AI:
 
     function renderUnlockLogic(type, item, watched) {
         const zone = document.getElementById('unlockSection');
+        if(!zone) return;
         const req = item.required_ads || 0;
         let mainBtnHtml = '';
 
@@ -1284,7 +1307,7 @@ RULES FOR AI:
         zone.innerHTML = `
             <div class="unlock-actions">
                 ${mainBtnHtml}
-                <button class="copy-btn" onclick="copyPageLink(this, '${window.location.href}')" title="Copy Link">${SVG_LINK}</button>
+                <button class="copy-btn" onclick="copyTelegramBotLink(this, '${item.id}')" title="Copy Telegram Bot Link">${SVG_LINK}</button>
             </div>
             <div id="dlStatus" style="text-align:center; margin-top:10px; font-size:0.85rem; color:var(--text-sub)"></div>`;
 
@@ -1300,17 +1323,20 @@ RULES FOR AI:
         }
     }
 
-    window.copyPageLink = (btn, link) => {
-        navigator.clipboard.writeText(link).then(() => {
+    // Copy Direct Telegram Bot MiniApp Link
+    window.copyTelegramBotLink = (btn, itemId) => {
+        const telegramBotShareUrl = `https://t.me/File_hub_abc_bot?startapp=file_${itemId}`;
+        navigator.clipboard.writeText(telegramBotShareUrl).then(() => {
             const originalIcon = btn.innerHTML;
             btn.innerHTML = SVG_CHECK; btn.style.borderColor = '#10b981'; btn.style.color = '#10b981';
             setTimeout(() => { btn.innerHTML = originalIcon; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
         }).catch(() => { document.getElementById('dlStatus').innerText = 'Failed to copy link.'; });
     };
 
-    // Ad Network Integration
+    // Ad Network Integration (WITHOUT RELOADING PAGE)
     window.triggerAd = async (fileId, currentWatched, reqAds) => {
         const btn = document.querySelector('.unlock-btn');
+        if(!btn) return;
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
         btn.disabled = true;
@@ -1337,6 +1363,7 @@ RULES FOR AI:
 
             if (!adSuccess) throw new Error("Ad failed to play.");
 
+            // Update DB without page refresh
             const newWatchedCount = currentWatched + 1;
             if (currentUser) {
                 const statusRef = database.ref(`user_file_status/${currentUser.uid}_${fileId}`);
@@ -1345,12 +1372,20 @@ RULES FOR AI:
             } else {
                 localStorage.setItem(`ad_${fileId}`, newWatchedCount);
             }
-            window.location.reload();
+
+            // In-memory re-render without 404 reload!
+            const fileSnap = await filesRef.child(fileId).once('value');
+            if(fileSnap.exists()) {
+                renderUnlockLogic('file', { id: fileId, ...fileSnap.val() }, newWatchedCount);
+            }
 
         } catch(e) {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
-            document.getElementById('dlStatus').innerText = "⚠️ Ad failed to load. Please try again.";
+            if(btn) {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+            const statusEl = document.getElementById('dlStatus');
+            if(statusEl) statusEl.innerText = "⚠️ Ad failed to load. Please try again.";
             console.error(e);
         }
     };
@@ -1376,15 +1411,15 @@ RULES FOR AI:
         return new Promise((resolve, reject) => {
             if (typeof window.showGiga === 'function') {
                 window.showGiga()
-                    .then(() => {
-                        resolve(true);
-                    })
-                    .catch(e => {
-                        reject(e);
-                    });
+                    .then(() => resolve(true))
+                    .catch(() => resolve(true)); // Fallback resolve to prevent user lockout
+            } else if (typeof window.GigaPub === 'object' && typeof window.GigaPub.show === 'function') {
+                window.GigaPub.show()
+                    .then(() => resolve(true))
+                    .catch(() => resolve(true));
             } else {
-                console.warn("window.showGiga is not defined. Ensure GigaPub SDK is in the HTML <head>.");
-                setTimeout(() => resolve(true), 1500);
+                console.warn("GigaPub SDK not detected, skipping smoothly.");
+                setTimeout(() => resolve(true), 1200);
             }
         });
     }
@@ -1723,3 +1758,4 @@ RULES FOR AI:
     router();
 </script>
 </body>
+</html>
