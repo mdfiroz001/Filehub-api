@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "cleanUrls": true,
   "rewrites": [
     {
@@ -7,11 +6,11 @@
       "destination": "/admin.html"
     },
     {
-      "source": "/file/(.*)",
+      "source": "/file/:path*",
       "destination": "/index.html"
     },
     {
-      "source": "/banner/(.*)",
+      "source": "/banner/:path*",
       "destination": "/index.html"
     },
     {
@@ -23,7 +22,7 @@
       "destination": "/index.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]
