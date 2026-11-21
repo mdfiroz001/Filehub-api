@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/admin", "dest": "/admin.html" },
-    { "src": "/admin/(.*)", "dest": "/admin.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/file/:slug", "destination": "/api/og?slug=:slug" },
+    { "source": "/banner/:id", "destination": "/api/og?banner=:id" },
+    { "source": "/template/:id", "destination": "/api/og?template=:id" },
+    { "source": "/templates", "destination": "/api/og?page=templates" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/admin/(.*)", "destination": "/admin.html" }
   ]
 }
