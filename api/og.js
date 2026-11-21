@@ -60,12 +60,20 @@ module.exports = async (req, res) => {
             description = cleanText(item.description || (type === 'template' ? 'Preview and download HTML animation templates on FileHub.' : DEFAULT_DESC)).substring(0, 160);
             image = item.thumbnail_url || DEFAULT_IMAGE;
             fileExt = (item.file_extension || '').toUpperCase();
-        } else if (page === 'templates') {
-            type = 'templates';
-            title = 'HTML Templates — FileHub';
-            description = 'Preview and download ready-to-use HTML and CSS animation templates on FileHub.';
-            shareUrl = `${baseUrl}/templates`;
-            redirectPath = '/#/templates';
+        } else if (page) {
+            const pageMeta = {
+                templates: ['HTML Templates — FileHub', 'Preview and download ready-to-use HTML and CSS animation templates on FileHub.'],
+                files: ['Files & Downloads — FileHub', 'Browse approved files, APKs and downloadable resources on FileHub.'],
+                prompts: ['AI Image Prompts — FileHub', 'Browse ready-to-use AI image prompts on FileHub.'],
+                register: ['Register — FileHub', 'Create your FileHub account and access the resource library.']
+            }[page];
+            if (pageMeta) {
+                type = 'page';
+                title = pageMeta[0];
+                description = pageMeta[1];
+                shareUrl = `${baseUrl}/${encodeURIComponent(page)}`;
+                redirectPath = `/#/${encodeURIComponent(page)}`;
+            }
         }
 
         // ---- HTML Response ----
