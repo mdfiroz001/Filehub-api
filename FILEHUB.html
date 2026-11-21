@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">  
+<head>  
+    <meta charset="UTF-8">  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <meta name="robots" content="noindex, nofollow">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="FileHub">
+    <meta property="og:title" content="FileHub Admin Panel">
+    <meta property="og:description" content="FileHub administration dashboard.">
+    <meta property="og:image" content="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="FileHub Admin Panel">
+    <meta name="twitter:description" content="FileHub administration dashboard.">
+    <meta name="twitter:image" content="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png">
+    <title>FileHub Admin Panel</title>  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">  
+<script src="https://cdn.tailwindcss.com"></script>  
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />  
+  
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>  
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>  
+  
+<style>  
+    :root {  
+        --primary: #4f46e5;  
+        --primary-light: #e0e7ff;  
+        --primary-glow: rgba(79, 70, 229, 0.35);  
+        --secondary: #10b981;  
+        --bg: #f8fafc;  
+        --surface: #ffffff;  
+        --text-main: #0f172a;  
+        --text-sub: #64748b;  
+        --border: #e2e8f0;  
+        --red: #ef4444;  
+        --green: #22c55e;  
+        --yellow: #f59e0b;  
+    }  
+    [data-theme="dark"] {  
+        --primary: #818cf8;  
+        --primary-light: #1e293b;  
+        --primary-glow: rgba(129, 140, 248, 0.35);  
+        --secondary: #34d399;  
+        --bg: #0f172a;  
+        --surface: #1e293b;  
+        --text-main: #f8fafc;  
+        --text-sub: #94a3b8;  
+        --border: #334155;  
+        --red: #dc2626;  
+        --green: #16a34a;  
+        --yellow: #d97706;  
+    }  
+    body {   
+        font-family: 'Inter', sans-serif;   
+        background: var(--bg);   
+        color: var(--text-main);   
+        min-height: 100vh;   
+        transition: all 0.3s ease;  
+    }  
+    .sidebar {  
+        width: 280px;  
+        background: var(--surface);  
+        border-right: 1px solid var(--border);  
+        padding: 20px;  
+        position: fixed;  
+        top: 0;  
+        left: -280px;  
+        height: 100vh;  
+        z-index: 1000;  
+        transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);  
+        overflow-y: auto;  
+        display: flex;  
+        flex-direction: column;  
+        box-shadow: 4px 0 24px rgba(0,0,0,0.02);  
+    }  
+    .sidebar.open { left: 0; }  
+    @media (min-width: 768px) {  
+        .sidebar { left: 0; }  
+        .main-content { margin-left: 280px; }  
+    }  
+    .sidebar-overlay {  
+        position: fixed;  
+        top: 0; left: 0; width: 100%; height: 100%;  
+        background: rgba(15, 23, 42, 0.6);  
+        backdrop-filter: blur(4px);  
+        z-index: 999;  
+        display: none;  
+    }  
+    .sidebar-overlay.active { display: block; }  
+    .sidebar-header {  
+        display: flex;  
+        align-items: center;  
+        gap: 12px;  
+        margin-bottom: 25px;  
+        padding-bottom: 20px;  
+        border-bottom: 1px solid var(--border);  
+    }  
+    .sidebar-logo {  
+        width: 44px;  
+        height: 44px;  
+        border-radius: 12px;  
+        object-fit: cover;  
+        border: 2px solid var(--primary);  
+        box-shadow: 0 4px 10px var(--primary-glow);  
+    }  
+    .sidebar-title {  
+        font-family: 'Outfit', sans-serif;  
+        font-size: 1.45rem;  
+        font-weight: 800;  
+        letter-spacing: -0.5px;  
+    }  
+    .nav-link {  
+        display: flex;  
+        align-items: center;  
+        gap: 12px;  
+        padding: 12px 16px;  
+        border-radius: 10px;  
+        color: var(--text-sub);  
+        font-weight: 600;  
+        font-size: 0.92rem;  
+        transition: all 0.2s ease;  
+        margin-bottom: 6px;  
+        cursor: pointer;  
+        text-decoration: none;  
+    }  
+    .nav-link:hover {   
+        background: var(--primary-light);   
+        color: var(--primary);  
+        transform: translateX(3px);  
+    }  
+    .nav-link.active {   
+        background: var(--primary);   
+        color: white;   
+        box-shadow: 0 4px 14px var(--primary-glow);  
+    }  
+    .nav-link i { font-size: 1.15rem; width: 22px; text-align: center; }  
+      
+    .main-content { flex-grow: 1; padding: 25px; }  
+    .card {  
+        background: var(--surface);   
+        border-radius: 18px;  
+        padding: 24px;   
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);  
+        border: 1px solid var(--border);  
+        margin-bottom: 24px;  
+    }  
+    .card-title {  
+        font-family: 'Outfit', sans-serif;  
+        font-size: 1.25rem;   
+        font-weight: 700;  
+        margin-bottom: 16px;  
+        display: flex;  
+        align-items: center;  
+        gap: 8px;  
+    }  
+      
+    /* ড্যাশবোর্ড কার্ড স্টাইল */  
+    .stat-card-pro {  
+        background: var(--surface);  
+        border: 1px solid var(--border);  
+        border-radius: 18px;  
+        padding: 20px;  
+        display: flex;  
+        align-items: center;  
+        justify-content: space-between;  
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);  
+        position: relative;  
+        overflow: hidden;  
+        transition: transform 0.25s ease, box-shadow 0.25s ease;  
+    }  
+    .stat-card-pro:hover {  
+        transform: translateY(-3px);  
+        box-shadow: 0 8px 25px rgba(0,0,0,0.06);  
+    }  
+    .stat-card-pro::after {  
+        content: '';  
+        position: absolute;  
+        left: 0;  
+        bottom: 0;  
+        width: 100%;  
+        height: 4px;  
+    }  
+    .stat-blue::after { background: #4f46e5; }  
+    .stat-emerald::after { background: #10b981; }  
+    .stat-amber::after { background: #f59e0b; }  
+    .stat-purple::after { background: #8b5cf6; }  
+
+    .stat-icon-wrap {  
+        width: 56px;  
+        height: 56px;  
+        border-radius: 14px;  
+        display: flex;  
+        align-items: center;  
+        justify-content: center;  
+        font-size: 1.6rem;  
+    }  
+
+    .btn {  
+        padding: 9px 18px; border-radius: 10px;  
+        font-weight: 600; cursor: pointer;  
+        transition: 0.2s; border: none;  
+        font-size: 0.9rem;  
+        display: inline-flex; align-items: center; justify-content: center;  
+        gap: 8px;  
+    }  
+    .btn-primary { background: var(--primary); color: white; }  
+    .btn-primary:hover { opacity: 0.92; box-shadow: 0 4px 12px var(--primary-glow); }  
+    .btn-danger { background: var(--red); color: white; }  
+    .btn-danger:hover { opacity: 0.92; }  
+    .btn-success { background: var(--green); color: white; }  
+    .btn-success:hover { opacity: 0.92; }  
+    .btn-warning { background: var(--yellow); color: white; }  
+    .btn-warning:hover { opacity: 0.92; }  
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }  
+
+    .form-group { margin-bottom: 18px; }  
+    .form-label { display: block; font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }  
+    .form-input, .form-textarea, .form-select {   
+        width: 100%; padding: 11px 14px;  
+        border: 1.5px solid var(--border); border-radius: 10px;  
+        background: var(--bg); color: var(--text-main);  
+        box-sizing: border-box; font-size: 0.95rem;  
+        transition: border-color 0.2s;  
+    }  
+    .form-input:focus, .form-textarea:focus, .form-select:focus {  
+        outline: none; border-color: var(--primary);  
+    }  
+    .status-badge {  
+        padding: 4px 12px; border-radius: 20px;  
+        font-size: 0.75rem; font-weight: 700; text-transform: capitalize;  
+        display: inline-flex; align-items: center; gap: 4px;  
+    }  
+    .status-active { background: #e0e7ff; color: #4f46e5; }  
+    .status-inactive { background: #fee2e2; color: #dc2626; }  
+    .status-approved { background: #dcfce7; color: #16a34a; }  
+    .status-pending { background: #fef3c7; color: #d97706; }  
+    .status-rejected { background: #fee2e2; color: #dc2626; }  
+      
+    .modal-overlay {  
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;  
+        background: rgba(15, 23, 42, 0.65);  
+        backdrop-filter: blur(5px);  
+        z-index: 2000; display: none;  
+        justify-content: center; align-items: center;  
+    }  
+    .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }  
+    .modal-box {  
+        background: var(--surface); width: 92%; max-width: 620px;  
+        max-height: 90vh; overflow-y: auto;  
+        border-radius: 18px; padding: 26px;  
+        position: relative;  
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);  
+        border: 1px solid var(--border);  
+    }  
+    .modal-close {  
+        position: absolute; top: 18px; right: 18px;  
+        cursor: pointer; font-size: 1.3rem;  
+        color: var(--text-sub); transition: 0.2s;  
+    }  
+    .modal-close:hover { color: var(--red); }  
+    .alert { padding: 14px; border-radius: 10px; margin-bottom: 18px; font-weight: 500; font-size: 0.92rem; }  
+    .alert-success { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }  
+    .alert-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }  
+    .hidden { display: none !important; }  
+
+    .data-table { width: 100%; border-collapse: separate; border-spacing: 0; white-space: nowrap; }  
+    .data-table th { text-align: left; padding: 14px; background: var(--bg); color: var(--text-sub); font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }  
+    .data-table td { padding: 14px; border-bottom: 1px solid var(--border); font-size: 0.92rem; }  
+    .data-table tr:hover td { background: var(--bg); }  
+      
+    .info-badge {  
+        background: rgba(79, 70, 229, 0.08); color: var(--primary);  
+        padding: 10px 16px; border-radius: 10px;  
+        font-size: 0.88rem; font-weight: 600;  
+        display: inline-flex; align-items: center; gap: 8px;  
+        margin-bottom: 20px; width: 100%;  
+        border-left: 4px solid var(--primary);  
+    }  
+
+    .slug-preview {  
+        background: var(--bg);  
+        border: 1px solid var(--border);  
+        border-radius: 8px;  
+        padding: 10px 14px;  
+        font-family: monospace;  
+        font-size: 0.85rem;  
+        color: var(--primary);  
+        word-break: break-all;  
+        margin-top: 6px;  
+    }  
+    .slug-input-wrapper {  
+        display: flex; align-items: center; gap: 6px;  
+        background: var(--bg);  
+        border: 1.5px solid var(--border);  
+        border-radius: 10px;  
+        padding: 0 12px;  
+    }  
+    .slug-input-wrapper:focus-within { border-color: var(--primary); }  
+    .slug-input-wrapper .prefix {  
+        color: var(--text-sub); font-size: 0.88rem;  
+        white-space: nowrap; font-family: monospace;  
+    }  
+    .slug-input-wrapper input {  
+        border: none; background: transparent;  
+        padding: 11px 0; outline: none;  
+        width: 100%; color: var(--text-main);  
+        font-family: monospace; font-size: 0.9rem;  
+    }  
+
+    .prompt-thumb {  
+        width: 60px; height: 60px;  
+        object-fit: cover; border-radius: 10px;  
+        border: 1px solid var(--border);  
+    }  
+    .step-badge {  
+        background: var(--primary-light);  
+        color: var(--primary);  
+        padding: 4px 10px;  
+        border-radius: 20px;  
+        font-size: 0.75rem;  
+        font-weight: 700;  
+        display: inline-flex;  
+        align-items: center; gap: 4px;  
+    }  
+    .step-badge.step-zero { background: #dcfce7; color: #16a34a; }  
+
+    .social-input-row {  
+        display: flex; align-items: center; gap: 10px;  
+        background: var(--bg); border: 1.5px solid var(--border);  
+        border-radius: 10px; padding: 0 12px;  
+        margin-bottom: 12px;  
+    }  
+    .social-input-row .icon-box {  
+        width: 32px; height: 32px;  
+        border-radius: 50%;  
+        display: flex; align-items: center; justify-content: center;  
+        color: white; font-size: 0.9rem; flex-shrink: 0;  
+    }  
+    .social-input-row .icon-box.telegram { background: #0088cc; }  
+    .social-input-row .icon-box.facebook { background: #1877f2; }  
+    .social-input-row .icon-box.youtube { background: #ff0000; }  
+    .social-input-row .icon-box.whatsapp { background: #25d366; }  
+    .social-input-row .icon-box.instagram { background: linear-gradient(45deg, #f09433, #dc2743, #bc1888); }  
+    .social-input-row .icon-box.twitter { background: #000000; }  
+    .social-input-row .icon-box.email { background: #ea4335; }  
+    .social-input-row input {  
+        flex: 1; border: none; background: transparent;  
+        padding: 12px 0; outline: none; color: var(--text-main);  
+        font-size: 0.9rem;  
+    }  
+
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }  
+    ::-webkit-scrollbar { width: 6px; height: 6px; }  
+    ::-webkit-scrollbar-track { background: var(--bg); }  
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }  
+</style>
+
+</head>  
+<body>  <div id="app">  
+    <!-- লগইন সেকশন -->  
+    <div id="login-section" class="min-h-screen flex items-center justify-center p-4">  
+        <div class="card max-w-md w-full" style="box-shadow: 0 20px 40px rgba(0,0,0,0.06);">  
+            <div class="text-center mb-6">  
+                <!-- স্বয়ংক্রিয় ব্যাকআপ সহ লোগো -->  
+                <img id="login-logo-img" src="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png"   
+                     onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png';"  
+                     alt="FileHub" class="w-20 h-20 rounded-2xl mx-auto mb-4 object-cover shadow-md border-2 border-indigo-500">  
+                <h2 class="text-2xl font-bold font-['Outfit']">Admin Portal</h2>  
+                <p class="text-sm text-gray-500 mt-1">Sign in to control FileHub</p>  
+            </div>  
+            <div id="login-alert" class="alert hidden"></div>  
+            <form id="login-form">  
+                <div class="form-group">  
+                    <label class="form-label">Admin Email</label>  
+                    <input type="email" id="login-email" class="form-input" placeholder="admin@filehub.com" required>  
+                </div>  
+                <div class="form-group">  
+                    <label class="form-label">Password</label>  
+                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>  
+                </div>  
+                <button type="submit" class="btn btn-primary w-full justify-center" id="login-btn" style="width:100%; padding: 12px;">  
+                    <i class="fas fa-sign-in-alt mr-2"></i> Access Dashboard  
+                </button>  
+            </form>  
+        </div>  
+    </div>  <!-- এডমিন প্যানেল -->  
+<div id="admin-panel" class="hidden min-h-screen">  
+    <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>  
+    <aside class="sidebar" id="sidebar">  
+        <div class="sidebar-header">  
+            <!-- সাইডবার লোগো -->  
+            <img id="sidebar-logo-img" src="https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png"   
+                 onerror="this.onerror=null;this.src='https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png';"  
+                 alt="FileHub" class="sidebar-logo">  
+            <h1 class="sidebar-title" id="sidebar-brand-name">FileHub</h1>  
+            <button class="md:hidden ml-auto text-xl text-gray-500" onclick="toggleSidebar()">  
+                <i class="fas fa-times"></i>  
+            </button>  
+        </div>  
+        <nav style="flex:1;">  
+            <div class="nav-link active" data-page="dashboard" onclick="loadPage('dashboard')">  
+                <i class="fas fa-chart-pie"></i> Dashboard  
+            </div>  
+            <div class="nav-link" data-page="files" onclick="loadPage('files')">  
+                <i class="fas fa-folder-open"></i> Manage Files  
+            </div>  
+            <div class="nav-link" data-page="banners" onclick="loadPage('banners')">  
+                <i class="fas fa-images"></i> Sliders / Banners  
+            </div>  
+            <div class="nav-link" data-page="html-templates" onclick="loadPage('html-templates')">
+                <i class="fas fa-code"></i> HTML Templates
+            </div>
+            <div class="nav-link" data-page="ai-prompts" onclick="loadPage('ai-prompts')">  
+                <i class="fas fa-wand-magic-sparkles"></i> AI Prompts  
+            </div>  
+            <div class="nav-link" data-page="admin-info" onclick="loadPage('admin-info')">  
+                <i class="fas fa-user-shield"></i> Admin Info  
+            </div>  
+            <div class="nav-link" data-page="users" onclick="loadPage('users')">  
+                <i class="fas fa-users"></i> Users Management  
+            </div>  
+            <div class="nav-link" data-page="notifications" onclick="loadPage('notifications')">  
+                <i class="fas fa-bell"></i> Push Notice  
+            </div>  
+            <div class="nav-link" data-page="settings" onclick="loadPage('settings')">  
+                <i class="fas fa-palette"></i> Site Customization  
+            </div>  
+            <div class="nav-link" data-page="ads" onclick="loadPage('ads')">  
+                <i class="fas fa-rectangle-ad"></i> Ads & Script Slots  
+            </div>  
+            <div class="nav-link" data-page="ai-settings" onclick="loadPage('ai-settings')">  
+                <i class="fas fa-robot"></i> AI Chat Assistant  
+            </div>  
+        </nav>  
+        <div style="margin-top:auto; padding-top:16px; border-top:1px solid var(--border);">  
+            <div class="nav-link text-red-500 hover:bg-red-50 hover:text-red-600" onclick="logout()">  
+                <i class="fas fa-power-off"></i> Logout  
+            </div>  
+        </div>  
+    </aside>  
+
+    <main class="main-content">  
+        <div class="md:hidden flex items-center justify-between mb-6 pb-4 border-b border-gray-200">  
+            <button class="text-2xl text-gray-700" onclick="toggleSidebar()">  
+                <i class="fas fa-bars"></i>  
+            </button>  
+            <h2 class="text-xl font-bold font-['Outfit']">FileHub Admin</h2>  
+            <div class="w-8"></div>  
+        </div>  
+        <div id="page-content" class="overflow-hidden"></div>  
+    </main>  
+</div>
+
+</div>  <div id="item-modal" class="modal-overlay">  
+    <div class="modal-box">  
+        <span class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></span>  
+        <h3 id="modal-title" class="card-title"></h3>  
+        <div id="modal-alert" class="alert hidden"></div>  
+        <form id="modal-form"></form>  
+    </div>  
+</div>  <div id="confirm-modal" class="modal-overlay">  
+    <div class="modal-box" style="max-width:400px; text-align: center;">  
+        <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl">  
+            <i class="fas fa-exclamation-triangle"></i>  
+        </div>  
+        <h3 class="card-title justify-center mb-2">Are you sure?</h3>  
+        <p id="confirm-message" class="text-sm text-gray-500 mb-6"></p>  
+        <div class="flex justify-center gap-3">  
+            <button class="btn btn-sm bg-gray-200 text-gray-700 hover:bg-gray-300" onclick="closeConfirmModal()">Cancel</button>  
+            <button class="btn btn-sm btn-danger" id="confirm-action">Yes, Confirm</button>  
+        </div>  
+    </div>  
+</div>  <script>  
+    const firebaseConfig = {  
+        apiKey: "AIzaSyAgblSHPL02TI8lyw5XBRJEi4y3lUOlqKQ",  
+        authDomain: "file-5dd84.firebaseapp.com",  
+        databaseURL: "https://file-5dd84-default-rtdb.firebaseio.com",  
+        projectId: "file-5dd84",  
+        storageBucket: "file-5dd84.firebasestorage.app",  
+        messagingSenderId: "425635065125",  
+        appId: "1:425635065125:web:a8ce55b1745f301bb5becc",  
+    };  
+  
+    firebase.initializeApp(firebaseConfig);  
+    const auth = firebase.auth();  
+    const database = firebase.database();  
+  
+    const usersRef = database.ref('users');  
+    const filesRef = database.ref('files');
+    const htmlTemplatesRef = database.ref('html_templates');
+    const htmlTemplateSourcesRef = database.ref('html_template_sources');  
+    const bannersRef = database.ref('banners');  
+    const settingsRef = database.ref('settings');  
+    const notificationsRef = database.ref('notifications');  
+    const adminsRef = database.ref('admins');  
+  
+    let currentUser = null;  
+    let isAdmin = false;  
+    let currentPage = 'dashboard';  
+    let allUsers = [];  
+    let allFiles = [];
+    let allHtmlTemplates = [];  
+    let allBanners = [];  
+    let appSettings = {};  
+  
+    const DEFAULT_LOGO = "https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png";  
+  
+    // লোগো ডাইনামিক আপডেট মেথড  
+    function updateAdminBranding(logoUrl, name) {  
+        const targetLogo = logoUrl && logoUrl.trim() !== '' ? logoUrl : DEFAULT_LOGO;  
+        const brandName = name && name.trim() !== '' ? name : 'FileHub';  
+          
+        const loginImg = document.getElementById('login-logo-img');  
+        if (loginImg) loginImg.src = targetLogo;  
+  
+        const sidebarImg = document.getElementById('sidebar-logo-img');  
+        if (sidebarImg) sidebarImg.src = targetLogo;  
+  
+        const brandText = document.getElementById('sidebar-brand-name');  
+        if (brandText) brandText.textContent = brandName;  
+    }  
+  
+    auth.onAuthStateChanged(async (user) => {  
+        if (user) {  
+            try {  
+                const adminSnap = await adminsRef.child(user.uid).once('value');  
+                if (adminSnap.exists()) {  
+                    currentUser = user;  
+                    isAdmin = true;  
+                    showAdminPanel();  
+                    await loadData();  
+                } else {  
+                    auth.signOut();  
+                    showLogin();  
+                    showAlert('login-alert', 'You are not authorized as admin.', 'error');  
+                }  
+            } catch (error) {  
+                console.error("Admin check error:", error);  
+                auth.signOut();  
+                showLogin();  
+                showAlert('login-alert', 'Authentication error: ' + error.message, 'error');  
+            }  
+        } else {  
+            showLogin();  
+            // সেটিংস থেকে প্রি-লোড লোগো  
+            settingsRef.child('app').once('value').then(snap => {  
+                const s = snap.val() || {};  
+                updateAdminBranding(s.logoUrl, s.appName);  
+            }).catch(() => {});  
+        }  
+    });  
+  
+    document.getElementById('login-form').addEventListener('submit', async (e) => {  
+        e.preventDefault();  
+        const email = document.getElementById('login-email').value;  
+        const password = document.getElementById('login-password').value;  
+        const loginBtn = document.getElementById('login-btn');  
+        loginBtn.disabled = true;  
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Logging in...';  
+        try {  
+            await auth.signInWithEmailAndPassword(email, password);  
+        } catch (error) {  
+            showAlert('login-alert', error.message, 'error');  
+            loginBtn.disabled = false;  
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i> Access Dashboard';  
+        }  
+    });  
+  
+    function showLogin() {  
+        document.getElementById('login-section').classList.remove('hidden');  
+        document.getElementById('admin-panel').classList.add('hidden');  
+    }  
+    function showAdminPanel() {  
+        document.getElementById('login-section').classList.add('hidden');  
+        document.getElementById('admin-panel').classList.remove('hidden');  
+    }  
+    function toggleSidebar() {  
+        document.getElementById('sidebar').classList.toggle('open');  
+        document.getElementById('sidebar-overlay').classList.toggle('active');  
+    }  
+  
+    async function loadData() {  
+        try {  
+            const usersSnap = await usersRef.once('value');  
+            allUsers = usersSnap.val() ? Object.entries(usersSnap.val()).map(function(e) { return Object.assign({ id: e[0] }, e[1]); }) : [];  
+            const filesSnap = await filesRef.once('value');
+            const templatesSnap = await htmlTemplatesRef.once('value');
+            allHtmlTemplates = templatesSnap.val() ? Object.entries(templatesSnap.val()).map(function(e){return Object.assign({id:e[0]},e[1]);}).sort(function(a,b){return (b.created_at||0)-(a.created_at||0);}) : [];  
+            allFiles = filesSnap.val() ? Object.entries(filesSnap.val()).map(function(e) { return Object.assign({ id: e[0] }, e[1]); }).sort(function(a, b) { return (b.created_at || 0) - (a.created_at || 0); }) : [];  
+            const bannersSnap = await bannersRef.once('value');  
+            allBanners = bannersSnap.val() ? Object.entries(bannersSnap.val()).map(function(e) { return Object.assign({ id: e[0] }, e[1]); }).sort(function(a, b) { return (b.created_at || 0) - (a.created_at || 0); }) : [];  
+            const settingsSnap = await settingsRef.once('value');  
+            appSettings = settingsSnap.val() || {};  
+  
+            const appCfg = appSettings.app || {};  
+            updateAdminBranding(appCfg.logoUrl, appCfg.appName);  
+  
+            loadPage(currentPage);  
+        } catch (error) {  
+            console.error('Error loading data:', error);  
+            document.getElementById('page-content').innerHTML = '<div class="card"><div class="alert alert-error">Error loading data: ' + error.message + '</div><button class="btn btn-primary" onclick="loadData()">Retry</button></div>';  
+        }  
+    }  
+  
+    async function loadPage(page) {  
+        currentPage = page;  
+        document.querySelectorAll('.nav-link').forEach(function(link) {  
+            link.classList.remove('active');  
+            if (link.dataset.page === page) link.classList.add('active');  
+        });  
+        if (window.innerWidth < 768) {  
+            document.getElementById('sidebar').classList.remove('open');  
+            document.getElementById('sidebar-overlay').classList.remove('active');  
+        }  
+        switch(page) {  
+            case 'dashboard': renderDashboard(); break;  
+            case 'files': renderFiles(); break;  
+            case 'banners': renderBanners(); break;  
+            case 'ai-prompts': renderAIPrompts(); break;
+            case 'html-templates': renderHtmlTemplates(); break;  
+            case 'admin-info': renderAdminInfo(); break;  
+            case 'users': renderUsers(); break;  
+            case 'notifications': renderNotifications(); break;  
+            case 'settings': renderSettings(); break;  
+            case 'ads': renderAdSettings(); break;  
+            case 'ai-settings': renderAISettings(); break;  
+            default: renderDashboard();  
+        }  
+    }  
+  
+    async function logout() {  
+        await auth.signOut();  
+        window.location.reload();  
+    }  
+  
+    function showAlert(elementId, message, type) {  
+        type = type || 'success';  
+        const alert = document.getElementById(elementId);  
+        if (alert) {  
+            alert.textContent = message;  
+            alert.className = 'alert alert-' + type;  
+            alert.classList.remove('hidden');  
+            setTimeout(function() { alert.classList.add('hidden'); }, 4000);  
+        } else {  
+            alert(message);  
+        }  
+    }  
+  
+    function openModal() { document.getElementById('item-modal').classList.add('active'); }  
+    function closeModal() {  
+        document.getElementById('item-modal').classList.remove('active');  
+        const alert = document.getElementById('modal-alert');  
+        if (alert) alert.classList.add('hidden');  
+    }  
+    function openConfirmModal(message, onConfirm) {  
+        document.getElementById('confirm-message').textContent = message;  
+        document.getElementById('confirm-modal').classList.add('active');  
+        document.getElementById('confirm-action').onclick = async function() {  
+            try { await onConfirm(); } catch(e) { console.error(e); alert("Action failed: " + e.message); }  
+            closeConfirmModal();  
+        };  
+    }  
+    function closeConfirmModal() { document.getElementById('confirm-modal').classList.remove('active'); }  
+  
+    function esc(str) {  
+        if (!str) return '';  
+        return String(str)  
+            .replace(/&/g, '&amp;')  
+            .replace(/</g, '&lt;')  
+            .replace(/>/g, '&gt;')  
+            .replace(/"/g, '&quot;')  
+            .replace(/'/g, '&#039;');  
+    }  
+  
+    // ==================== SLUG SYSTEM ====================  
+    function generateSlugFromTitle(title) {  
+        if (!title) return '';  
+        return title.toLowerCase().trim()  
+            .replace(/[\u0980-\u09FF]/g, '')  
+            .replace(/[^a-z0-9\s-]/g, '')  
+            .replace(/\s+/g, '-')  
+            .replace(/-+/g, '-')  
+            .replace(/^-+|-+$/g, '')  
+            .substring(0, 60);  
+    }  
+    window.autoGenerateSlug = function() {  
+        const titleInput = document.getElementById('file-title');  
+        const slugInput = document.getElementById('file-slug');  
+        if (!titleInput || !slugInput) return;  
+        if (slugInput.dataset.userEdited === 'true') return;  
+        slugInput.value = generateSlugFromTitle(titleInput.value);  
+        updateSlugPreview();  
+    };  
+    window.sanitizeSlugInput = function() {  
+        const slugInput = document.getElementById('file-slug');  
+        if (!slugInput) return;  
+        const cleaned = slugInput.value.toLowerCase()  
+            .replace(/[\u0980-\u09FF]/g, '')  
+            .replace(/[^a-z0-9\s-]/g, '')  
+            .replace(/\s+/g, '-')  
+            .replace(/-+/g, '-');  
+        slugInput.value = cleaned;  
+        slugInput.dataset.userEdited = 'true';  
+        updateSlugPreview();  
+    };  
+    window.updateSlugPreview = function() {  
+        const slugInput = document.getElementById('file-slug');  
+        const previewEl = document.getElementById('slug-preview');  
+        if (!slugInput || !previewEl) return;  
+        const slug = slugInput.value.trim() || 'auto-generated';  
+        previewEl.textContent = window.location.origin + '/file/' + slug;  
+    };  
+    async function getUniqueSlug(baseSlug, excludeFileId) {  
+        let slug = baseSlug;  
+        let counter = 1;  
+        while (counter <= 20) {  
+            const snapshot = await filesRef.child(slug).once('value');  
+            if (!snapshot.exists() || snapshot.key === excludeFileId) return slug;  
+            counter++;  
+            slug = baseSlug + '-' + counter;  
+        }  
+        return baseSlug + '-' + Date.now().toString().slice(-5);  
+    }  
+  
+    // ==================== সুন্দর ড্যাশবোর্ড ডিজাইন ====================  
+    function renderDashboard() {  
+        const pendingFilesCount = allFiles.filter(function(f) { return f.status === 'pending'; }).length;  
+        const approvedFilesCount = allFiles.filter(function(f) { return f.status === 'approved'; }).length;  
+        const totalAIPrompts = (appSettings.aiImage && appSettings.aiImage.prompts ? appSettings.aiImage.prompts.length : 0);  
+        const publishedTemplatesCount = allHtmlTemplates.filter(function(t) { return t.status === 'approved'; }).length;
+        const templateDownloads = allHtmlTemplates.reduce(function(sum, t) { return sum + (t.downloads || 0); }, 0);
+        const totalDownloads = allFiles.reduce(function(sum, f) { return sum + (f.total_downloads || 0); }, 0);  
+  
+        document.getElementById('page-content').innerHTML =   
+            '<div class="flex items-center justify-between mb-8">' +  
+                '<div>' +  
+                    '<h1 class="text-3xl font-extrabold font-[\'Outfit\']">System Overview</h1>' +  
+                    '<p class="text-sm text-gray-500 mt-1">Real-time statistics & platform metrics</p>' +  
+                '</div>' +  
+                '<button class="btn btn-primary" onclick="openFileForm()"><i class="fas fa-plus"></i> Quick Upload</button>' +  
+            '</div>' +  
+  
+            '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">' +  
+                '<div class="stat-card-pro stat-blue">' +  
+                    '<div>' +  
+                        '<div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Total Users</div>' +  
+                        '<div class="text-3xl font-bold font-[\'Outfit\']">' + allUsers.length + '</div>' +  
+                        '<div class="text-xs text-indigo-500 mt-2 font-medium"><i class="fas fa-arrow-trend-up mr-1"></i>Active members</div>' +  
+                    '</div>' +  
+                    '<div class="stat-icon-wrap bg-indigo-50 text-indigo-600"><i class="fas fa-users"></i></div>' +  
+                '</div>' +  
+  
+                '<div class="stat-card-pro stat-emerald">' +  
+                    '<div>' +  
+                        '<div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Live Files</div>' +  
+                        '<div class="text-3xl font-bold font-[\'Outfit\']">' + approvedFilesCount + '</div>' +  
+                        '<div class="text-xs text-emerald-500 mt-2 font-medium"><i class="fas fa-cloud-arrow-down mr-1"></i>' + totalDownloads + ' Downloads</div>' +  
+                    '</div>' +  
+                    '<div class="stat-icon-wrap bg-emerald-50 text-emerald-600"><i class="fas fa-file-circle-check"></i></div>' +  
+                '</div>' +  
+  
+                '<div class="stat-card-pro stat-amber">' +  
+                    '<div>' +  
+                        '<div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">Pending Approval</div>' +  
+                        '<div class="text-3xl font-bold font-[\'Outfit\']">' + pendingFilesCount + '</div>' +  
+                        '<div class="text-xs text-amber-500 mt-2 font-medium"><i class="fas fa-clock mr-1"></i>Requires action</div>' +  
+                    '</div>' +  
+                    '<div class="stat-icon-wrap bg-amber-50 text-amber-600"><i class="fas fa-hourglass-half"></i></div>' +  
+                '</div>' +  
+  
+                '<div class="stat-card-pro stat-purple">' +  
+                    '<div>' +  
+                        '<div class="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-1">AI Prompts</div>' +  
+                        '<div class="text-3xl font-bold font-[\'Outfit\']">' + totalAIPrompts + '</div>' +  
+                        '<div class="text-xs text-purple-500 mt-2 font-medium"><i class="fas fa-sparkles mr-1"></i>' + publishedTemplatesCount + ' HTML Templates</div>' +  
+                    '</div>' +  
+                    '<div class="stat-icon-wrap bg-purple-50 text-purple-600"><i class="fas fa-wand-magic-sparkles"></i></div>' +  
+                '</div>' +  
+            '</div>' +  
+  
+            '<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">' +  
+                '<div class="card">' +  
+                    '<div class="flex justify-between items-center mb-4">' +  
+                        '<h3 class="card-title mb-0"><i class="fas fa-file-lines text-indigo-500"></i> Recent Files</h3>' +  
+                        '<button class="text-xs font-bold text-indigo-600 hover:underline" onclick="loadPage(\'files\')">View All</button>' +  
+                    '</div>' +  
+                    '<div class="overflow-x-auto"><table class="data-table">' +  
+                    '<thead><tr><th>Title</th><th>Status</th><th>Downloads</th></tr></thead><tbody>' +  
+                    allFiles.slice(0, 6).map(function(file) {  
+                        return '<tr>' +  
+                            '<td class="font-medium max-w-[180px] truncate"><a href="' + file.download_url + '" target="_blank" class="hover:text-indigo-600">' + esc(file.title || 'Untitled') + '</a></td>' +  
+                            '<td><span class="status-badge status-' + (file.status || 'pending') + '">' + (file.status || 'pending') + '</span></td>' +  
+                            '<td class="font-semibold">' + (file.total_downloads || 0) + '</td>' +  
+                        '</tr>';  
+                    }).join('') +  
+                    (allFiles.length === 0 ? '<tr><td colspan="3" class="text-center text-gray-400 py-6">No files uploaded yet</td></tr>' : '') +  
+                    '</tbody></table></div>' +  
+                '</div>' +  
+  
+                '<div class="card">' +  
+                    '<div class="flex justify-between items-center mb-4">' +  
+                        '<h3 class="card-title mb-0"><i class="fas fa-user-clock text-indigo-500"></i> Recent Users</h3>' +  
+                        '<button class="text-xs font-bold text-indigo-600 hover:underline" onclick="loadPage(\'users\')">View All</button>' +  
+                    '</div>' +  
+                    '<div class="overflow-x-auto"><table class="data-table">' +  
+                    '<thead><tr><th>UID</th><th>Username</th><th>Account</th></tr></thead><tbody>' +  
+                    allUsers.slice(0, 6).map(function(user) {  
+                        return '<tr>' +  
+                            '<td class="font-mono text-xs text-gray-500">' + (user.numericId || user.id.substring(0,8)) + '</td>' +  
+                            '<td class="font-medium">' + esc(user.username || 'Anonymous') + '</td>' +  
+                            '<td><span class="status-badge ' + (user.isAccountActive !== false ? 'status-active' : 'status-inactive') + '">' + (user.isAccountActive !== false ? 'Active' : 'Suspended') + '</span></td>' +  
+                        '</tr>';  
+                    }).join('') +  
+                    (allUsers.length === 0 ? '<tr><td colspan="3" class="text-center text-gray-400 py-6">No registered users</td></tr>' : '') +  
+                    '</tbody></table></div>' +  
+                '</div>' +  
+            '</div>';  
+    }  
+  
+    // ==================== FILES ====================  
+    function renderFiles() {  
+        let rows = '';  
+        allFiles.forEach(function(file) {  
+            const isCustomSlug = !file.id.startsWith('-');  
+            rows += '<tr>' +  
+                '<td class="font-medium max-w-xs truncate" title="' + esc(file.title) + '">' + esc(file.title || 'Untitled') + '</td>' +  
+                '<td><code style="font-size:0.75rem;color:' + (isCustomSlug ? 'var(--green)' : 'var(--text-sub)') + ';">/file/' + file.id + '</code></td>' +  
+                '<td><span class="status-badge status-' + (file.status || 'pending') + '">' + (file.status || 'pending') + '</span></td>' +  
+                '<td><span class="step-badge ' + ((file.required_ads || 0) === 0 ? 'step-zero' : '') + '">' + (file.required_ads || 0) + '</span></td>' +  
+                '<td>' + (file.total_downloads || 0) + '</td>' +  
+                '<td class="flex gap-1 flex-wrap">' +  
+                    '<a href="' + file.download_url + '" target="_blank" class="btn btn-primary btn-sm" title="Visit"><i class="fas fa-external-link-alt"></i></a>' +  
+                    (file.status === 'pending' ? '<button class="btn btn-success btn-sm" onclick="updateFileStatus(\'' + file.id + '\', \'approved\')"><i class="fas fa-check"></i></button>' : '') +  
+                    '<button class="btn btn-warning btn-sm" onclick="editFile(\'' + file.id + '\')"><i class="fas fa-edit"></i></button>' +  
+                    '<button class="btn btn-danger btn-sm" onclick="deleteFile(\'' + file.id + '\', \'' + esc(file.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-trash"></i></button>' +  
+                '</td></tr>';  
+        });  
+        if (allFiles.length === 0) rows = '<tr><td colspan="6" class="text-center text-gray-500 py-8">No files uploaded yet</td></tr>';  
+  
+        document.getElementById('page-content').innerHTML =   
+            '<div class="flex justify-between items-center mb-6">' +  
+                '<h1 class="text-3xl font-bold font-[\'Outfit\']">Manage Files</h1>' +  
+                '<button class="btn btn-primary" onclick="openFileForm()"><i class="fas fa-upload mr-2"></i> Upload New File</button>' +  
+            '</div>' +  
+            '<div class="card overflow-hidden"><div class="overflow-x-auto">' +  
+                '<table class="data-table w-full text-sm"><thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Steps</th><th>Downloads</th><th>Actions</th></tr></thead>' +  
+                '<tbody>' + rows + '</tbody></table>' +  
+            '</div></div>';  
+    }  
+  
+    async function updateFileStatus(fileId, status) {  
+        try {  
+            await filesRef.child(fileId).update({ status: status });  
+            const file = allFiles.find(function(f) { return f.id === fileId; });  
+            if (file && file.uploadedBy) {  
+                await notificationsRef.push({  
+                    title: 'File ' + (status === 'approved' ? 'Approved' : 'Rejected'),  
+                    decs: 'Your uploaded file "' + file.title + '" has been ' + status + '.',  
+                    created_at: Date.now(),  
+                    is_read: false,  
+                    target_uid: file.uploadedBy  
+                });  
+            }  
+            await loadData();  
+        } catch(e) { console.error(e); alert("Error: " + e.message); }  
+    }  
+  
+    // ==================== BANNERS ====================  
+    function renderBanners() {  
+        let rows = '';  
+        allBanners.forEach(function(banner) {  
+            rows += '<tr>' +  
+                '<td><img src="' + esc(banner.thumbnail_url) + '" style="width:70px;height:40px;object-fit:cover;border-radius:6px;" onerror="this.src=\'https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png\'"></td>' +  
+                '<td class="font-medium">' + esc(banner.title || 'Untitled') + '</td>' +  
+                '<td>' + (banner.download_url ? '<a href="' + esc(banner.download_url) + '" target="_blank" style="color:var(--primary);font-size:0.8rem;text-decoration:underline;">' + esc(banner.download_url.substring(0, 40)) + (banner.download_url.length > 40 ? '...' : '') + '</a>' : '<span style="color:var(--text-sub);font-size:0.8rem;font-style:italic;">No link</span>') + '</td>' +  
+                '<td class="flex gap-1">' +  
+                    '<button class="btn btn-warning btn-sm" onclick="editBanner(\'' + banner.id + '\')"><i class="fas fa-edit"></i></button>' +  
+                    '<button class="btn btn-danger btn-sm" onclick="deleteBanner(\'' + banner.id + '\', \'' + esc(banner.title || '').replace(/'/g, "\\'") + '\')"><i class="fas fa-trash"></i></button>' +  
+                '</td></tr>';  
+        });  
+        if (allBanners.length === 0) rows = '<tr><td colspan="4" class="text-center text-gray-500 py-8">No banners yet</td></tr>';  
+  
+        document.getElementById('page-content').innerHTML =   
+            '<div class="flex justify-between items-center mb-6">' +  
+                '<h1 class="text-3xl font-bold font-[\'Outfit\']">Sliders & Banners</h1>' +  
+                '<button class="btn btn-primary" onclick="openBannerForm()"><i class="fas fa-plus mr-2"></i> Add Slider</button>' +  
+            '</div>' +  
+            '<div class="info-badge"><i class="fas fa-info-circle"></i><span>ব্যানার আনলিমিটেড। শুধু ছবি + লিংক।</span></div>' +  
+            '<div class="card"><div class="overflow-x-auto">' +  
+                '<table class="data-table"><thead><tr><th>Thumbnail</th><th>Title</th><th>Target Link</th><th>Actions</th></tr></thead>' +  
+                '<tbody>' + rows + '</tbody></table>' +  
+            '</div></div>';  
+    }  
+  
+    // ==================== HTML TEMPLATE MANAGER ====================
+    function renderHtmlTemplates(){
+        const rows=allHtmlTemplates.map(function(t){return '<tr><td>'+esc(t.title)+'</td><td>'+esc(t.status||'pending')+'</td><td>'+(t.downloads||0)+'</td><td><button class="btn btn-primary btn-sm" onclick="openHtmlTemplateForm(\''+t.id+'\')"><i class="fas fa-edit"></i></button> <button class="btn btn-danger btn-sm" onclick="deleteHtmlTemplate(\''+t.id+'\')"><i class="fas fa-trash"></i></button></td></tr>';}).join('');
+        document.getElementById('page-content').innerHTML='<div class="flex items-center justify-between mb-6"><div><h1 class="text-3xl font-extrabold">HTML Templates</h1><p class="text-sm text-gray-500">Add HTML/CSS animation code and set the required ad steps.</p></div><button class="btn btn-primary" onclick="openHtmlTemplateForm()"><i class="fas fa-plus"></i> Add Template</button></div><div class="card overflow-x-auto"><table class="data-table"><thead><tr><th>Title</th><th>Status</th><th>Downloads</th><th>Actions</th></tr></thead><tbody>'+(rows||'<tr><td colspan="4">No templates yet.</td></tr>')+'</tbody></table></div>';
+    }
+    window.openHtmlTemplateForm=async function(id){
+        const t=id?allHtmlTemplates.find(x=>x.id===id)||{}:{};
+        let sourceCode='', sourceCss=''; if(id){const sourceSnap=await htmlTemplateSourcesRef.child(id).once('value');const src=sourceSnap.val()||{};sourceCode=src.html_code||'';sourceCss=src.css_code||'';}
+        document.getElementById('modal-title').textContent=id?'Edit HTML Template':'Add HTML Template';
+        const savedCode=sourceCode+(sourceCss?'\n<style>\n'+sourceCss+'\n</style>':'')||sourceCss||'';
+        document.getElementById('modal-form').innerHTML='<div id="html-template-fields"><div class="form-group"><label class="form-label">Animation / Template Title</label><input id="ht-title" class="form-input" value="'+esc(t.title||'')+'" placeholder="Enter a short title" required></div><div class="form-group"><label class="form-label">HTML / CSS Animation Code</label><textarea id="ht-code" class="form-textarea" rows="16" style="font-family:monospace;white-space:pre;tab-size:2" placeholder="Paste complete HTML code, HTML fragment, or CSS animation code here...">'+esc(savedCode)+'</textarea><small>একটি কোড বক্সেই সম্পূর্ণ HTML অথবা CSS @keyframes animation দিন। CSS-only হলে Preview-তে একটি demo element দেখানো হবে।</small></div><div class="form-group"><button type="button" class="btn btn-primary" onclick="previewAdminHtmlTemplate()"><i class="fas fa-eye"></i> Live Preview</button><div id="ht-admin-preview-wrap" style="display:none;margin-top:12px"><iframe id="ht-admin-preview" title="Template preview" sandbox="allow-scripts" style="width:100%;height:360px;border:1px solid #d1d5db;border-radius:12px;background:#fff"></iframe></div></div><div class="form-group"><label class="form-label">Required Ad Steps</label><input id="ht-ads" type="number" min="0" class="form-input" value="'+(t.required_ads||0)+'" required><small>ব্যবহারকারী নির্ধারিত সংখ্যক Ad Step সম্পন্ন করলেই Download আনলক হবে।</small></div><div class="form-group"><label class="form-label">Status</label><select id="ht-status" class="form-select"><option value="approved" '+(t.status!=='pending'?'selected':'')+'>Published</option><option value="pending" '+(t.status==='pending'?'selected':'')+'>Draft / Pending</option></select></div><button class="btn btn-success" type="submit">Save Template</button></div>';
+        openModal();document.getElementById('modal-form').onsubmit=function(e){saveHtmlTemplate(e,id);};
+    };
+    window.previewAdminHtmlTemplate=function(){const code=document.getElementById('ht-code').value||'';const doc=buildTemplateDocument(code,'');const frame=document.getElementById('ht-admin-preview');document.getElementById('ht-admin-preview-wrap').style.display='block';frame.srcdoc=doc;};
+    function buildTemplateDocument(code,legacyCss){let raw=String(code||'').trim();const css=String(legacyCss||'');if(!raw)raw='<div class="animation-preview-item">Preview</div>';const looksLikeHtml=/<(?:!doctype|html|head|body|div|section|main|article|canvas|svg|style|script|h[1-6]|p|button|span|ul|li)\b/i.test(raw);let html;if(looksLikeHtml){html=raw;if(!/<html[\s>]/i.test(html))html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'+html+'</body></html>';}else{html='<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{margin:0;min-height:100%;font-family:Arial,sans-serif}.preview-stage{min-height:340px;display:grid;place-items:center;overflow:hidden;background:linear-gradient(135deg,#eef2ff,#fdf2f8)}.animation-preview-item{display:grid;place-items:center;min-width:120px;min-height:120px;padding:24px;border-radius:24px;background:linear-gradient(135deg,#6366f1,#a855f7);color:white;font-weight:700;box-shadow:0 15px 40px #6366f155}</style><style>'+raw+'</style></head><body><main class="preview-stage"><div class="animation-preview-item">Animation Preview</div></main></body></html>';}if(css){if(/<\/head>/i.test(html))html=html.replace(/<\/head>/i,'<style>'+css+'</style></head>');else html='<style>'+css+'</style>'+html;}return html;}
+    async function saveHtmlTemplate(e,id){e.preventDefault();const old=id?allHtmlTemplates.find(x=>x.id===id)||{}:{};const title=document.getElementById('ht-title').value.trim();const code=document.getElementById('ht-code').value;const slug=generateSlugFromTitle(title)||('template-'+Date.now());const data={title:title,slug:slug,description:'',thumbnail_url:'',required_ads:Math.max(0,parseInt(document.getElementById('ht-ads').value)||0),unlock_code_hash:null,status:document.getElementById('ht-status').value,created_at:old.created_at||Date.now(),updated_at:Date.now(),downloads:old.downloads||0,created_by:old.created_by||currentUser.uid};try{let templateId=id;if(id)await htmlTemplatesRef.child(id).update(data);else{const newRef=htmlTemplatesRef.push();templateId=newRef.key;await newRef.set(data);}await htmlTemplateSourcesRef.child(templateId).set({code:code,html_code:code,css_code:'',updated_at:Date.now()});closeModal();await loadData();loadPage('html-templates');}catch(err){alert('Save failed: '+err.message);}}
+    window.deleteHtmlTemplate=async function(id){if(!confirm('Delete this HTML template?'))return;await htmlTemplatesRef.child(id).remove();await htmlTemplateSourcesRef.child(id).remove();await loadData();renderHtmlTemplates();};
+
+    // ==================== AI PROMPTS ====================  
+    function renderAIPrompts() {  
+        const imgSettings = appSettings.aiImage || {};  
+        const prompts = imgSettings.prompts || [];  
+        const isEnabled = imgSettings.enabled !== false;  
+        const geminiUrl = imgSettings.geminiUrl || 'https://gemini.google.com/app';  
+  
+        let rows = '';  
+        prompts.forEach(function(p, i) {  
+            const reqAds = parseInt(p.required_ads) || 0;  
+            rows += '<tr>' +  
+                '<td>' + (p.sample_image ? '<img src="' + esc(p.sample_image) + '" class="prompt-thumb" onerror="this.style.display=\'none\'">' : '<span style="color:var(--text-sub);font-size:0.8rem;">No image</span>') + '</td>' +  
+                '<td class="font-medium">' + esc(p.title || 'Untitled') + '</td>' +  
+                '<td class="prompt-text-cell">' + esc((p.prompt || '').substring(0, 100)) + (p.prompt && p.prompt.length > 100 ? '...' : '') + '</td>' +  
+                '<td><span class="step-badge ' + (reqAds === 0 ? 'step-zero' : '') + '"><i class="fas fa-play-circle" style="font-size:0.6rem;"></i> ' + reqAds + '</span></td>' +  
+                '<td>' + (p.detail_photos && p.detail_photos.length ? '<span style="color:var(--primary);font-weight:700;font-size:0.8rem;">' + p.detail_photos.length + ' 📷</span>' : '<span style="color:var(--text-sub);font-size:0.75rem;">—</span>') + '</td>' +  
+                '<td><div class="flex gap-1 flex-wrap">' +  
+                    '<button class="btn btn-primary btn-sm" onclick="copyPromptAdmin(' + i + ')" title="Copy"><i class="fas fa-copy"></i></button>' +  
+                    '<button class="btn btn-warning btn-sm" onclick="openPromptForm(' + i + ')" title="Edit"><i class="fas fa-edit"></i></button>' +  
+                    '<button class="btn btn-danger btn-sm" onclick="deletePrompt(' + i + ')" title="Delete"><i class="fas fa-trash"></i></button>' +  
+                '</div></td></tr>';  
+        });  
+        if (prompts.length === 0) rows = '<tr><td colspan="6" class="text-center text-gray-500 py-8">No prompts yet. Click "Add New Prompt".</td></tr>';  
+  
+        document.getElementById('page-content').innerHTML =   
+            '<div class="flex justify-between items-center mb-6">' +  
+                '<h1 class="text-3xl font-bold font-[\'Outfit\']"><i class="fas fa-magic text-indigo-500 mr-2"></i> AI Image Prompts</h1>' +  
+            '</div>' +  
+            '<div class="info-badge"><i class="fas fa-lightbulb"></i><span>প্রতিটি প্রমোটে আলাদা Steps সেট করা যাবে। Detail Images দিলে স্লাইডার দেখাবে।</span></div>' +  
+            '<div class="card mb-6"><h3 class="card-title">⚙️ General Settings</h3>' +  
+                '<div id="ai-prompt-alert" class="alert hidden"></div>' +  
+                '<form id="ai-prompt-settings-form">' +  
+                    '<div class="form-group flex items-center mb-4">' +  
+                        '<input type="checkbox" id="ai-prompt-enabled" class="mr-3 w-5 h-5" ' + (isEnabled ? 'checked' : '') + '>' +  
+                        '<label class="form-label mb-0 cursor-pointer" for="ai-prompt-enabled">Enable AI Prompts</label>' +  
+                    '</div>' +  
+                    '<div class="form-group">' +  
+                        '<label class="form-label">Gemini AI URL</label>' +  
+                        '<input type="url" id="ai-prompt-gemini-url" class="form-input" value="' + esc(geminiUrl) + '">' +  
+                    '</div>' +  
+                    '<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-2"></i> Save Settings</button>' +  
+                '</form>' +  
+            '</div>' +  
+            '<div class="card">' +  
+                '<div class="flex justify-between items-center mb-4">' +  
+                    '<h3 class="card-title mb-0">📝 Prompt Library (' + prompts.length + ')</h3>' +  
+                    '<button class="btn btn-primary" onclick="openPromptForm()"><i class="fas fa-plus mr-2"></i> Add New Prompt</button>' +  
+                '</div>' +  
+                '<div class="overflow-x-auto"><table class="data-table w-full">' +  
+                '<thead><tr><th>Preview</th><th>Title</th><th>Prompt</th><th>Steps</th><th>Detail</th><th>Actions</th></tr></thead>' +  
+                '<tbody>' + rows + '</tbody></table></div>' +  
+            '</div>';  
+  
+        document.getElementById('ai-prompt-settings-form').addEventListener('submit', saveAIPromptSettings);  
+    }  
+  
+    async function saveAIPromptSettings(e) {  
+        e.preventDefault();  
+        const imgSettings = appSettings.aiImage || {};  
+        try {  
+            await settingsRef.child('aiImage').update({  
+                enabled: document.getElementById('ai-prompt-enabled').checked,  
+                geminiUrl: document.getElementById('ai-prompt-gemini-url').value.trim() || 'https://gemini.google.com/app',  
+                prompts: imgSettings.prompts || []  
+            });  
+            showAlert('ai-prompt-alert', '✅ Settings saved!', 'success');  
+            await loadData();  
+        } catch (error) { showAlert('ai-prompt-alert', error.message, 'error'); }  
+    }  
+  
+    function openPromptForm(index) {  
+        const imgSettings = appSettings.aiImage || {};  
+        const prompts = imgSettings.prompts || [];  
+        const prompt = (index !== null && index !== undefined) ? prompts[index] : {};  
+        const detailPhotosStr = (prompt.detail_photos || []).join('\n');  
+        const isEdit = (index !== null && index !== undefined);  
+  
+        document.getElementById('modal-title').textContent = isEdit ? '✏️ Edit Prompt' : '➕ Add New Prompt';  
+  
+        const sampleImagePreview = prompt.sample_image ? '<img src="' + esc(prompt.sample_image) + '" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid var(--border);">' : '';  
+        const detailPreview = (prompt.detail_photos || []).map(function(u) {  
+            return '<img src="' + esc(u) + '" onerror="this.style.display=\'none\'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">';  
+        }).join('');  
+  
+        document.getElementById('modal-form').innerHTML =   
+            '<div class="form-group">' +  
+                '<label class="form-label">Prompt Title <span style="color:var(--red);">*</span></label>' +  
+                '<input type="text" id="prompt-title" class="form-input" value="' + esc(prompt.title || '') + '" placeholder="e.g., Realistic Portrait" required>' +  
+            '</div>' +  
+            '<div class="form-group">' +  
+                '<label class="form-label">Prompt Text <span style="color:var(--red);">*</span></label>' +  
+                '<textarea id="prompt-text" class="form-textarea" rows="5" placeholder="A photorealistic portrait..." required style="font-family:monospace;font-size:0.85rem;">' + esc(prompt.prompt || '') + '</textarea>' +  '</div>' +  
+        '<div class="form-group">' +  
+            '<label class="form-label">Required Steps (Ads) <span style="color:var(--red);">*</span></label>' +  
+            '<input type="number" id="prompt-required-ads" class="form-input" value="' + (parseInt(prompt.required_ads) || 0) + '" min="0">' +  
+            '<p style="font-size:0.75rem;color:var(--text-sub);margin-top:5px;">💡 0 দিলে ফ্রি, 1+ দিলে ঐ পরিমাণ Ads দেখতে হবে।</p>' +  
+        '</div>' +  
+        '<div class="form-group">' +  
+            '<label class="form-label">Sample Image URL</label>' +  
+            '<input type="url" id="prompt-sample-image" class="form-input" value="' + esc(prompt.sample_image || '') + '" oninput="previewSampleImage()">' +  
+            '<div id="sample-image-preview" style="margin-top:10px;">' + sampleImagePreview + '</div>' +  
+        '</div>' +  
+        '<div class="form-group">' +  
+            '<label class="form-label">Detail Images (প্রতি লাইনে একটি URL)</label>' +  
+            '<textarea id="prompt-detail-photos" class="form-textarea" rows="4" oninput="previewDetailPhotos()" style="font-family:monospace;font-size:0.82rem;">' + esc(detailPhotosStr) + '</textarea>' +  
+            '<div id="detail-photos-preview" class="flex gap-2 flex-wrap mt-2">' + detailPreview + '</div>' +  
+        '</div>' +  
+        '<div class="flex justify-end gap-3 mt-4">' +  
+            '<button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>' +  
+            '<button type="submit" class="btn btn-success" id="save-prompt-btn"><i class="fas fa-save mr-2"></i> Save Prompt</button>' +  
+        '</div>';  
+
+    document.getElementById('modal-form').onsubmit = function(e) { savePrompt(e, index); };  
+    openModal();  
+}  
+
+window.previewSampleImage = function() {  
+    const url = document.getElementById('prompt-sample-image').value.trim();  
+    const preview = document.getElementById('sample-image-preview');  
+    if (!url) { preview.innerHTML = ''; return; }  
+    preview.innerHTML = '<img src="' + esc(url) + '" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid var(--border);" onerror="this.style.display=\'none\'">';  
+};  
+
+window.previewDetailPhotos = function() {  
+    const text = document.getElementById('prompt-detail-photos').value.trim();  
+    const preview = document.getElementById('detail-photos-preview');  
+    if (!text) { preview.innerHTML = ''; return; }  
+    const urls = text.split('\n').map(function(u) { return u.trim(); }).filter(function(u) { return u; });  
+    preview.innerHTML = urls.map(function(u) {  
+        return '<img src="' + esc(u) + '" onerror="this.style.display=\'none\'" style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">';  
+    }).join('');  
+};  
+
+async function savePrompt(e, index) {  
+    e.preventDefault();  
+    const btn = document.getElementById('save-prompt-btn');  
+    btn.disabled = true;  
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';  
+
+    const title = document.getElementById('prompt-title').value.trim();  
+    const promptText = document.getElementById('prompt-text').value.trim();  
+    const requiredAds = parseInt(document.getElementById('prompt-required-ads').value) || 0;  
+    const sampleImage = document.getElementById('prompt-sample-image').value.trim();  
+    const detailPhotosText = document.getElementById('prompt-detail-photos').value.trim();  
+    const detailPhotos = detailPhotosText.split('\n').map(function(u) { return u.trim(); }).filter(function(u) { return u; });  
+
+    if (!title || !promptText) {  
+        showAlert('modal-alert', 'Fill required fields', 'error');  
+        btn.disabled = false;  
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Prompt';  
+        return;  
+    }  
+
+    try {  
+        const imgSettings = appSettings.aiImage || {};  
+        let prompts = (imgSettings.prompts || []).slice();  
+        const isEdit = (index !== null && index !== undefined);  
+        const newPrompt = {  
+            title: title,  
+            prompt: promptText,  
+            required_ads: requiredAds,  
+            sample_image: sampleImage,  
+            detail_photos: detailPhotos,  
+            created_at: (isEdit && prompts[index]) ? (prompts[index].created_at || Date.now()) : Date.now()  
+        };  
+        if (isEdit) prompts[index] = newPrompt;  
+        else prompts.push(newPrompt);  
+
+        await settingsRef.child('aiImage').child('prompts').set(prompts);  
+        showAlert('modal-alert', '✅ Prompt saved!', 'success');  
+        setTimeout(function() { closeModal(); loadData(); }, 800);  
+    } catch (error) {  
+        showAlert('modal-alert', error.message, 'error');  
+        btn.disabled = false;  
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Prompt';  
+    }  
+}  
+
+window.copyPromptAdmin = function(index) {  
+    const imgSettings = appSettings.aiImage || {};  
+    const prompts = imgSettings.prompts || [];  
+    if (!prompts[index]) return;  
+    navigator.clipboard.writeText(prompts[index].prompt).then(function() {  
+        alert('✅ Prompt copied!');  
+    }).catch(function() {  
+        const temp = document.createElement('textarea');  
+        temp.value = prompts[index].prompt;  
+        document.body.appendChild(temp);  
+        temp.select();  
+        document.execCommand('copy');  
+        document.body.removeChild(temp);  
+        alert('✅ Copied!');  
+    });  
+};  
+
+window.deletePrompt = function(index) {  
+    openConfirmModal('Delete this prompt permanently?', async function() {  
+        const imgSettings = appSettings.aiImage || {};  
+        let prompts = (imgSettings.prompts || []).slice();  
+        prompts.splice(index, 1);  
+        await settingsRef.child('aiImage').child('prompts').set(prompts);  
+        await loadData();  
+    });  
+};  
+
+// ==================== ADMIN INFO ====================  
+function renderAdminInfo() {  
+    const adminSettings = appSettings.admin || {};  
+    const adminName = adminSettings.name || 'FILE HUB এডমিন';  
+    const adminBio = adminSettings.bio || '';  
+    const social = adminSettings.social || {};  
+
+    document.getElementById('page-content').innerHTML =   
+        '<div class="flex justify-between items-center mb-6">' +  
+            '<h1 class="text-3xl font-bold font-[\'Outfit\']"><i class="fas fa-user-shield text-indigo-500 mr-2"></i> Admin Info</h1>' +  
+        '</div>' +  
+        '<div class="info-badge">' +  
+            '<i class="fas fa-info-circle"></i>' +  
+            '<span>এই তথ্যগুলো AI Chat এ ব্যবহার হবে। ইউজার যখন এডমিন সম্পর্কে জিজ্ঞেস করবে, AI এই তথ্য দেবে।</span>' +  
+        '</div>' +  
+
+        '<div class="card mb-6">' +  
+            '<h3 class="card-title">👤 Admin Basic Info</h3>' +  
+            '<div id="admin-info-alert" class="alert hidden"></div>' +  
+            '<form id="admin-info-form">' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">Admin Display Name</label>' +  
+                    '<input type="text" id="admin-name" class="form-input" value="' + esc(adminName) + '" placeholder="e.g., FILE HUB এডমিন" required>' +  
+                    '<p style="font-size:0.75rem;color:var(--text-sub);margin-top:5px;">AI এই নামটি ইউজারকে বলবে।</p>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">About Admin (Optional)</label>' +  
+                    '<textarea id="admin-bio" class="form-textarea" rows="4" placeholder="Write something about the admin...">' + esc(adminBio) + '</textarea>' +  
+                '</div>' +  
+                '<button type="submit" class="btn btn-primary">' +  
+                    '<i class="fas fa-save mr-2"></i> Save Admin Info' +  
+                '</button>' +  
+            '</form>' +  
+        '</div>' +  
+
+        '<div class="card">' +  
+            '<h3 class="card-title">🌐 Social Media Links</h3>' +  
+            '<div id="admin-social-alert" class="alert hidden"></div>' +  
+            '<form id="admin-social-form">' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">📱 Telegram</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box telegram"><i class="fab fa-telegram-plane"></i></div>' +  
+                        '<input type="url" id="social-telegram" value="' + esc(social.telegram || '') + '" placeholder="https://t.me/username">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">📘 Facebook</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box facebook"><i class="fab fa-facebook-f"></i></div>' +  
+                        '<input type="url" id="social-facebook" value="' + esc(social.facebook || '') + '" placeholder="https://facebook.com/yourpage">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">📺 YouTube</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box youtube"><i class="fab fa-youtube"></i></div>' +  
+                        '<input type="url" id="social-youtube" value="' + esc(social.youtube || '') + '" placeholder="https://youtube.com/@yourchannel">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">💬 WhatsApp</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box whatsapp"><i class="fab fa-whatsapp"></i></div>' +  
+                        '<input type="url" id="social-whatsapp" value="' + esc(social.whatsapp || '') + '" placeholder="https://wa.me/8801234567890">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">📸 Instagram</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box instagram"><i class="fab fa-instagram"></i></div>' +  
+                        '<input type="url" id="social-instagram" value="' + esc(social.instagram || '') + '" placeholder="https://instagram.com/yourpage">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">🐦 Twitter / X</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box twitter"><i class="fab fa-twitter"></i></div>' +  
+                        '<input type="url" id="social-twitter" value="' + esc(social.twitter || '') + '" placeholder="https://twitter.com/yourhandle">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">📧 Email</label>' +  
+                    '<div class="social-input-row">' +  
+                        '<div class="icon-box email"><i class="fas fa-envelope"></i></div>' +  
+                        '<input type="email" id="social-email" value="' + esc(social.email || '') + '" placeholder="admin@filehub.com">' +  
+                    '</div>' +  
+                '</div>' +  
+                '<button type="submit" class="btn btn-primary">' +  
+                    '<i class="fas fa-save mr-2"></i> Save Social Media' +  
+                '</button>' +  
+            '</form>' +  
+        '</div>';  
+
+    document.getElementById('admin-info-form').addEventListener('submit', saveAdminInfo);  
+    document.getElementById('admin-social-form').addEventListener('submit', saveAdminSocial);  
+}  
+
+async function saveAdminInfo(e) {  
+    e.preventDefault();  
+    try {  
+        await settingsRef.child('admin').update({  
+            name: document.getElementById('admin-name').value.trim() || 'FILE HUB এডমিন',  
+            bio: document.getElementById('admin-bio').value.trim()  
+        });  
+        showAlert('admin-info-alert', '✅ Admin info saved!', 'success');  
+        await loadData();  
+    } catch (error) { showAlert('admin-info-alert', error.message, 'error'); }  
+}  
+
+async function saveAdminSocial(e) {  
+    e.preventDefault();  
+    try {  
+        await settingsRef.child('admin').child('social').update({  
+            telegram: document.getElementById('social-telegram').value.trim(),  
+            facebook: document.getElementById('social-facebook').value.trim(),  
+            youtube: document.getElementById('social-youtube').value.trim(),  
+            whatsapp: document.getElementById('social-whatsapp').value.trim(),  
+            instagram: document.getElementById('social-instagram').value.trim(),  
+            twitter: document.getElementById('social-twitter').value.trim(),  
+            email: document.getElementById('social-email').value.trim()  
+        });  
+        showAlert('admin-social-alert', '✅ Social media links saved!', 'success');  
+        await loadData();  
+    } catch (error) { showAlert('admin-social-alert', error.message, 'error'); }  
+}  
+
+// ==================== USERS ====================  
+function renderUsers() {  
+    document.getElementById('page-content').innerHTML =   
+        '<h1 class="text-3xl font-bold font-[\'Outfit\'] mb-6">Users Management</h1>' +  
+        '<div class="card"><div class="mb-4"><input type="text" id="user-search" class="form-input" placeholder="Search by name, username, email or ID..."></div>' +  
+        '<div class="overflow-x-auto"><table class="data-table w-full">' +  
+        '<thead><tr><th>User ID</th><th>Username</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>' +  
+        '<tbody id="users-table">' + generateUsersTableHTML(allUsers) + '</tbody></table></div></div>';  
+
+    const searchInput = document.getElementById('user-search');  
+    if (searchInput) {  
+        searchInput.addEventListener('input', function(e) {  
+            const s = e.target.value.toLowerCase();  
+            const filtered = allUsers.filter(function(u) {  
+                return (u.email && u.email.toLowerCase().indexOf(s) !== -1) ||  
+                       (u.username && u.username.toLowerCase().indexOf(s) !== -1) ||  
+                       (u.numericId && u.numericId.indexOf(s) !== -1) ||  
+                       (u.fullname && u.fullname.toLowerCase().indexOf(s) !== -1);  
+            });  
+            document.getElementById('users-table').innerHTML = generateUsersTableHTML(filtered);  
+        });  
+    }  
+}  
+
+function generateUsersTableHTML(users) {  
+    if (users.length === 0) return '<tr><td colspan="5" class="text-center text-gray-500 py-8">No users found</td></tr>';  
+    let html = '';  
+    users.forEach(function(user) {  
+        html += '<tr>' +  
+            '<td class="font-mono text-sm">' + (user.numericId || user.id.substring(0,10)) + '</td>' +  
+            '<td class="font-medium">' + esc(user.username || 'N/A') + '</td>' +  
+            '<td>' + esc(user.email || 'N/A') + '</td>' +  
+            '<td><span class="status-badge ' + (user.isAccountActive !== false ? 'status-active' : 'status-inactive') + '">' + (user.isAccountActive !== false ? 'Active' : 'Banned') + '</span></td>' +  
+            '<td class="flex gap-1">' +  
+                '<button class="btn ' + (user.isAccountActive !== false ? 'btn-danger' : 'btn-success') + ' btn-sm" onclick="toggleUserBan(\'' + user.id + '\', ' + (user.isAccountActive !== false) + ')"><i class="fas ' + (user.isAccountActive !== false ? 'fa-ban' : 'fa-check') + '"></i></button>' +  
+                '<button class="btn btn-warning btn-sm" onclick="editUser(\'' + user.id + '\')"><i class="fas fa-edit"></i></button>' +  
+            '</td></tr>';  
+    });  
+    return html;  
+}  
+
+async function toggleUserBan(userId, currentStatus) {  
+    openConfirmModal('Are you sure you want to ' + (currentStatus ? 'BAN' : 'UNBAN') + ' this user?', async function() {  
+        await usersRef.child(userId).update({ isAccountActive: !currentStatus });  
+        await loadData();  
+    });  
+}  
+
+// ==================== NOTIFICATIONS ====================  
+function renderNotifications() {  
+    document.getElementById('page-content').innerHTML =   
+        '<h1 class="text-3xl font-bold font-[\'Outfit\'] mb-6">Push Notifications</h1>' +  
+        '<div class="card mb-6"><h3 class="card-title">Send Broadcast or User Notice</h3>' +  
+        '<div id="notif-alert" class="alert hidden"></div>' +  
+        '<form id="notification-form">' +  
+            '<div class="form-group"><label class="form-label">Target UID (খালি রাখলে সবাই পাবে)</label><input type="text" id="notif-target" class="form-input" placeholder="all or user UID"></div>' +  
+            '<div class="form-group"><label class="form-label">Title</label><input type="text" id="notif-title" class="form-input" placeholder="Notice heading..." required></div>' +  
+            '<div class="form-group"><label class="form-label">Message (Markdown Supported)</label><textarea id="notif-message" class="form-textarea" rows="4" placeholder="Full notice description..." required></textarea></div>' +  
+            '<button type="submit" class="btn btn-primary" id="send-notif-btn"><i class="fas fa-paper-plane mr-2"></i> Send Notification</button>' +  
+        '</form></div>' +  
+        '<div class="card"><h3 class="card-title">Recent Sent Notices</h3><div class="overflow-x-auto">' +  
+        '<table class="data-table w-full"><thead><tr><th>Title</th><th>Target</th><th>Date</th><th></th></tr></thead>' +  
+        '<tbody id="notifications-list"><tr><td colspan="4" class="text-center">Loading...</td></tr></tbody></table></div></div>';  
+
+    loadRecentNotifications();  
+    document.getElementById('notification-form').addEventListener('submit', sendNotification);  
+}  
+
+async function loadRecentNotifications() {  
+    try {  
+        const snap = await notificationsRef.orderByChild('created_at').limitToLast(20).once('value');  
+        const notifications = snap.val() ? Object.entries(snap.val()).map(function(e) { return Object.assign({ id: e[0] }, e[1]); }).sort(function(a, b) { return (b.created_at || 0) - (a.created_at || 0); }) : [];  
+        const list = document.getElementById('notifications-list');  
+        if (!list) return;  
+        if (notifications.length === 0) {  
+            list.innerHTML = '<tr><td colspan="4" class="text-center text-gray-500 py-4">No notifications sent yet</td></tr>';  
+            return;  
+        }  
+        let html = '';  
+        notifications.forEach(function(n) {  
+            html += '<tr>' +  
+                '<td class="max-w-[200px] truncate font-medium">' + esc(n.title || 'Untitled') + '</td>' +  
+                '<td>' + (n.target_uid === 'all' || !n.target_uid ? '<span class="status-badge status-active">All Users</span>' : '<span class="status-badge status-pending">' + n.target_uid.substring(0,8) + '...</span>') + '</td>' +  
+                '<td>' + (n.created_at ? new Date(n.created_at).toLocaleDateString() : 'N/A') + '</td>' +  
+                '<td><button class="btn btn-danger btn-sm" onclick="deleteNotification(\'' + n.id + '\')"><i class="fas fa-trash"></i></button></td>' +  
+                '</tr>';  
+        });  
+        list.innerHTML = html;  
+    } catch (error) {  
+        console.error(error);  
+        const list = document.getElementById('notifications-list');  
+        if (list) list.innerHTML = '<tr><td colspan="4" class="text-center text-red-500 py-4">Error loading data</td></tr>';  
+    }  
+}  
+
+function deleteNotification(id) {  
+    openConfirmModal('Delete this notification permanently?', async function() {  
+        await notificationsRef.child(id).remove();  
+        loadRecentNotifications();  
+    });  
+}  
+
+async function sendNotification(e) {  
+    e.preventDefault();  
+    const sendBtn = document.getElementById('send-notif-btn');  
+    sendBtn.disabled = true;  
+    sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Sending...';  
+    const targetUid = document.getElementById('notif-target').value.trim();  
+    try {  
+        await notificationsRef.push({  
+            title: document.getElementById('notif-title').value,  
+            decs: document.getElementById('notif-message').value,  
+            created_at: Date.now(),  
+            is_read: false,  
+            target_uid: targetUid || 'all'  
+        });  
+        showAlert('notif-alert', 'Notification sent successfully!', 'success');  
+        document.getElementById('notification-form').reset();  
+        loadRecentNotifications();  
+    } catch (error) { showAlert('notif-alert', error.message, 'error'); }  
+    sendBtn.disabled = false;  
+    sendBtn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i> Send Notification';  
+}  
+
+// ==================== SETTINGS ====================  
+function renderSettings() {  
+    const s = appSettings.app || {}, w = appSettings.welcome || {};  
+    document.getElementById('page-content').innerHTML =   
+        '<h1 class="text-3xl font-bold font-[\'Outfit\'] mb-6">Site Customization</h1>' +  
+        '<div class="info-badge"><i class="fas fa-sliders"></i><span>এখান থেকেই মূল ওয়েবসাইটের নাম, লোগো, রঙ এবং নোটিশ কন্ট্রোল করুন।</span></div>' +  
+        '<div class="card">' +  
+            '<h3 class="card-title">🎨 Brand & Appearance</h3>' +  
+            '<div id="app-settings-alert" class="alert hidden"></div>' +  
+            '<form id="app-settings-form">' +  
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +  
+                    '<div class="form-group"><label class="form-label">Website Name</label><input id="app-name" class="form-input" value="' + esc(s.appName || 'FileHub') + '"></div>' +  
+                    '<div class="form-group"><label class="form-label">Logo URL</label><input id="app-logo" type="url" class="form-input" value="' + esc(s.logoUrl || '') + '" placeholder="https://i.postimg.cc/..."></div>' +  
+                    '<div class="form-group"><label class="form-label">Primary Color</label><input id="app-primary" type="color" class="form-input" value="' + esc(s.primaryColor || '#4f46e5') + '" style="height:45px;padding:4px"></div>' +  
+                    '<div class="form-group"><label class="form-label">Accent Color</label><input id="app-accent" type="color" class="form-input" value="' + esc(s.accentColor || '#818cf8') + '" style="height:45px;padding:4px"></div>' +  
+                '</div>' +  
+                '<div class="form-group"><label class="form-label">Scrolling Notice (Markdown Supported)</label><textarea id="scrolling-notice" class="form-textarea" rows="3" value="' + esc(s.scrollingNotice || '') + '" placeholder="নতুন আপডেটের খবর..."></div>' +  
+                '<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-2"></i> Save Appearance</button>' +  
+            '</form>' +  
+        '</div>' +  
+        '<div class="card">' +  
+            '<h3 class="card-title">👋 Welcome Popup</h3>' +  
+	            '<form id="welcome-settings-form">' +  
+	                '<label class="form-label mb-3 cursor-pointer flex items-center gap-2"><input type="checkbox" id="welcome-enabled" class="w-4 h-4" ' + (w.enabled !== false ? 'checked' : '') + '> Show popup on first visit</label>' +  
+	                '<div class="form-group"><label class="form-label">Title</label><input id="welcome-title" class="form-input" value="' + esc(w.title || 'স্বাগতম!') + '"></div>' +  
+	                '<div class="form-group"><label class="form-label">Message (Markdown Supported)</label><textarea id="welcome-message" class="form-textarea" rows="4">' + esc(w.message || 'FileHub-এ আপনাকে স্বাগতম। আপনার পছন্দের ফাইল ও AI prompt খুঁজে নিন।') + '</textarea></div>' +  
+	                '<div class="form-group"><label class="form-label">Popup Image URL (optional)</label><input id="welcome-image" type="url" class="form-input" value="' + esc(w.imageUrl || w.image || '') + '" placeholder="https://example.com/welcome-image.jpg" oninput="previewWelcomeImage()">' +  
+	                    '<p class="text-xs text-gray-500 mt-1">ইমেজটি সরাসরি দেখাতে একটি public image URL দিন।</p>' +  
+	                    '<div id="welcome-image-preview-wrap" class="mt-3 ' + ((w.imageUrl || w.image) ? '' : 'hidden') + '"><img id="welcome-image-preview" src="' + esc(w.imageUrl || w.image || '') + '" alt="Welcome popup preview" class="max-h-40 max-w-full rounded-xl border border-gray-200 object-cover" onerror="this.parentElement.classList.add(\'hidden\')"></div>' +  
+	                '</div>' +  
+	                '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +  
+	                    '<div class="form-group"><label class="form-label">Button Text</label><input id="welcome-button" class="form-input" value="' + esc(w.buttonText || 'Explore now') + '"></div>' +  
+	                    '<div class="form-group"><label class="form-label">Button URL (optional)</label><input id="welcome-url" type="url" class="form-input" value="' + esc(w.buttonUrl || '') + '"></div>' +  
+                '</div>' +  
+                '<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-2"></i> Save Welcome Popup</button>' +  
+            '</form>' +  
+        '</div>';  
+      
+	    document.getElementById('app-settings-form').onsubmit = saveAppSettings;  
+	    document.getElementById('welcome-settings-form').onsubmit = saveWelcomeSettings;  
+}  
+
+function previewWelcomeImage() {  
+    const input = document.getElementById('welcome-image');  
+    const wrap = document.getElementById('welcome-image-preview-wrap');  
+    const image = document.getElementById('welcome-image-preview');  
+    if (!input || !wrap || !image) return;  
+    const url = input.value.trim();  
+    if (!url) {  
+        wrap.classList.add('hidden');  
+        image.removeAttribute('src');  
+        return;  
+    }  
+    image.onload = function() { wrap.classList.remove('hidden'); };  
+    image.onerror = function() { wrap.classList.add('hidden'); };  
+    image.src = url;  
+}  
+
+async function saveAppSettings(e) {  
+    e.preventDefault();  
+    try {  
+        const logo = document.getElementById('app-logo').value.trim();  
+        const appName = document.getElementById('app-name').value.trim() || 'FileHub';  
+        await settingsRef.child('app').update({  
+            appName: appName,  
+            logoUrl: logo,  
+            primaryColor: document.getElementById('app-primary').value,  
+            accentColor: document.getElementById('app-accent').value,  
+            scrollingNotice: document.getElementById('scrolling-notice').value  
+        });  
+        updateAdminBranding(logo, appName);  
+        showAlert('app-settings-alert', '✅ Appearance saved!', 'success');  
+        await loadData();  
+    } catch (error) { showAlert('app-settings-alert', error.message, 'error'); }  
+}  
+
+async function saveWelcomeSettings(e) {  
+    e.preventDefault();  
+    try {  
+	        await settingsRef.child('welcome').set({  
+	            enabled: document.getElementById('welcome-enabled').checked,  
+	            title: document.getElementById('welcome-title').value,  
+	            message: document.getElementById('welcome-message').value,  
+	            imageUrl: document.getElementById('welcome-image').value.trim(),  
+	            buttonText: document.getElementById('welcome-button').value,  
+	            buttonUrl: document.getElementById('welcome-url').value.trim()  
+        });  
+        alert('✅ Welcome popup saved!');  
+        await loadData();  
+    } catch (error) { alert(error.message); }  
+}  
+
+// ==================== ADS & SCRIPT SLOTS ====================  
+function renderAdSettings() {  
+    const ads = appSettings.ads || {};  
+    document.getElementById('page-content').innerHTML =   
+        '<h1 class="text-3xl font-bold font-[\'Outfit\'] mb-6"><i class="fas fa-rectangle-ad text-indigo-500 mr-2"></i> Ads & Script Slots</h1>' +  
+        '<div class="info-badge"><i class="fas fa-shield-halved"></i><span>Adsterra Direct Link এবং বিভিন্ন ব্যানার কোড এখান থেকে ম্যানেজ করুন।</span></div>' +  
+        '<div class="card">' +  
+            '<div id="ads-settings-alert" class="alert hidden"></div>' +  
+            '<form id="ads-settings-form">' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">Adsterra Direct Link (বাধ্যতামূলক)</label>' +  
+                    '<input id="adsterra-direct-link" type="url" class="form-input font-mono text-sm" value="' + esc(ads.adsterraDirectLink || '') + '" placeholder="https://www.profitablecpmrate.com/..." required>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">Header Banner / Script Code</label>' +  
+                    '<textarea id="ads-header-code" class="form-textarea font-mono text-sm" rows="5" placeholder="<!-- Paste Ad script here -->">' + esc(ads.headerCode || '') + '</textarea>' +  
+                '</div>' +  
+                '<div class="form-group">' +  
+                    '<label class="form-label">Footer Banner / Script Code</label>' +  
+                    '<textarea id="ads-footer-code" class="form-textarea font-mono text-sm" rows="5" placeholder="<!-- Paste Ad script here -->">' + esc(ads.footerCode || '') + '</textarea>' +  
+                '</div>' +  
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +  
+                    '<div class="form-group"><label class="form-label">Notice Button Text</label><input id="notice-button-text" class="form-input" value="' + esc(ads.noticeButtonText || 'Open') + '"></div>' +  
+                    '<div class="form-group"><label class="form-label">Notice Button URL</label><input id="notice-button-url" type="url" class="form-input font-mono text-sm" value="' + esc(ads.noticeButtonUrl || '') + '"></div>' +  
+                '</div>' +  
+                '<button class="btn btn-primary" type="submit"><i class="fas fa-save mr-2"></i> Save Ad Settings</button>' +  
+            '</form>' +  
+        '</div>';  
+    document.getElementById('ads-settings-form').onsubmit = saveAdSettings;  
+}  
+
+async function saveAdSettings(e) {  
+    e.preventDefault();  
+    try {  
+        await settingsRef.child('ads').update({  
+            activeNetwork: 'adsterra',  
+            adsterraDirectLink: document.getElementById('adsterra-direct-link').value.trim(),  
+            headerCode: document.getElementById('ads-header-code').value,  
+            footerCode: document.getElementById('ads-footer-code').value,  
+            noticeButtonText: document.getElementById('notice-button-text').value,  
+            noticeButtonUrl: document.getElementById('notice-button-url').value.trim()  
+        });  
+        showAlert('ads-settings-alert', '✅ Ad settings saved!', 'success');  
+        await loadData();  
+    } catch (error) { showAlert('ads-settings-alert', error.message, 'error'); }  
+}  
+
+// ==================== AI CHAT SETTINGS ====================  
+function renderAISettings() {  
+    const aiKey = appSettings.aiApiKey || (appSettings.ai ? (appSettings.ai.apiKey || '') : '');  
+    const apiUrl = appSettings.ai ? (appSettings.ai.apiURL || 'https://api.openai.com/v1/chat/completions') : 'https://api.openai.com/v1/chat/completions';  
+    const aiModel = appSettings.ai ? (appSettings.ai.model || 'gpt-4o-mini') : 'gpt-4o-mini';  
+    const aiEnabled = appSettings.ai ? (appSettings.ai.enabled !== false) : true;  
+
+    document.getElementById('page-content').innerHTML =   
+        '<h1 class="text-3xl font-bold font-[\'Outfit\'] mb-6"><i class="fas fa-robot text-indigo-500 mr-2"></i> AI Chat Settings</h1>' +  
+        '<div class="card"><div id="ai-settings-alert" class="alert hidden"></div>' +  
+        '<form id="ai-settings-form">' +  
+            '<div class="form-group flex items-center mb-4">' +  
+                '<input type="checkbox" id="ai-enabled" class="mr-3 w-5 h-5" ' + (aiEnabled ? 'checked' : '') + '>' +  
+                '<label class="form-label mb-0 cursor-pointer" for="ai-enabled">Enable AI Chat Assistant</label>' +  
+            '</div>' +  
+            '<div class="form-group"><label class="form-label">API URL</label><input type="url" id="ai-api-url" class="form-input font-mono" value="' + esc(apiUrl) + '" required></div>' +  
+            '<div class="form-group"><label class="form-label">API Key</label><input type="password" id="ai-api-key" class="form-input font-mono" value="' + esc(aiKey) + '" placeholder="sk-..." required></div>' +  
+            '<div class="form-group"><label class="form-label">Model</label><input type="text" id="ai-model" class="form-input" value="' + esc(aiModel) + '"></div>' +  
+            '<div class="form-group"><label class="form-label">Assistant Instructions (System Prompt)</label><textarea id="ai-instructions" class="form-textarea" rows="4" placeholder="How should the assistant reply?">' + esc(appSettings.ai && appSettings.ai.instructions || '') + '</textarea></div>' +  
+            '<button type="submit" class="btn btn-primary"><i class="fas fa-save mr-2"></i> Save AI Config</button>' +  
+        '</form></div>';  
+
+    document.getElementById('ai-settings-form').addEventListener('submit', async function(e) {  
+        e.preventDefault();  
+        const apiKeyVal = document.getElementById('ai-api-key').value.trim();  
+        try {  
+            await settingsRef.child('ai').update({  
+                enabled: document.getElementById('ai-enabled').checked,  
+                apiURL: document.getElementById('ai-api-url').value.trim(),  
+                apiKey: apiKeyVal,  
+                model: document.getElementById('ai-model').value.trim() || 'gpt-4o-mini',  
+                instructions: document.getElementById('ai-instructions').value.trim()  
+            });  
+            await settingsRef.child('aiApiKey').set(apiKeyVal);  
+            showAlert('ai-settings-alert', 'AI settings saved!', 'success');  
+            await loadData();  
+        } catch (error) { showAlert('ai-settings-alert', error.message, 'error'); }  
+    });  
+}  
+
+// ==================== FILE FORM ====================  
+function openFileForm(fileId) {  
+    const file = fileId ? allFiles.find(function(f) { return f.id === fileId; }) : {};  
+    document.getElementById('modal-title').textContent = fileId ? 'Edit File' : 'Upload / Add New File';  
+
+    const isCustomSlug = fileId && !file.id.startsWith('-');  
+    const existingSlug = isCustomSlug ? file.id : '';  
+    const detailPhotosStr = (file.detail_photos || []).join('\n');  
+
+    document.getElementById('modal-form').innerHTML =   
+        '<div class="form-group">' +  
+            '<label class="form-label">Title <span style="color:var(--red);">*</span></label>' +  
+            '<input type="text" id="file-title" class="form-input" value="' + esc(file.title || '') + '" placeholder="e.g., TikTok Mod APK 2024" oninput="autoGenerateSlug()" required>' +  
+        '</div>' +  
+        '<div class="form-group">' +  
+            '<label class="form-label">🔗 Custom URL Slug (Optional)</label>' +  
+            '<div class="slug-input-wrapper"><span class="prefix">/file/</span>' +  
+            '<input type="text" id="file-slug" value="' + esc(existingSlug) + '" placeholder="tiktok-mod-apk" oninput="sanitizeSlugInput()">' +  
+            '</div><div class="slug-preview" id="slug-preview">Loading...</div>' +  
+        '</div>' +  
+        '<div class="form-group">' +  
+            '<label class="form-label">Description (Markdown Supported)</label>' +  
+            '<textarea id="file-description" class="form-textarea" rows="6" placeholder="Markdown supported..." required>' + esc(file.description || '') + '</textarea>' +  
+            '<p style="font-size:0.75rem;color:var(--text-sub);margin-top:5px;">Markdown: # Heading, **bold**, - list, [link](url), quote, code, ---</p>' +  
+        '</div>' +  
+        '<div class="form-group"><label class="form-label">Thumbnail URL</label><input type="url" id="file-thumbnail" class="form-input" value="' + esc(file.thumbnail_url || '') + '" required></div>' +  
+        '<div class="form-group"><label class="form-label">Download URL</label><input type="url" id="file-download-url" class="form-input" value="' + esc(file.download_url || '') + '" required></div>' +  
+        '<div class="grid grid-cols-2 gap-4">' +  
+            '<div class="form-group"><label class="form-label">Extension</label><input type="text" id="file-extension" class="form-input" value="' + esc(file.file_extension || '.zip') + '" required></div>' +  
+            '<div class="form-group"><label class="form-label">Required Ads</label><input type="number" id="file-required-ads" class="form-input" value="' + (file.required_ads || 0) + '" min="0" required></div>' +  
+        '</div>' +  
+        '<div class="form-group"><label class="form-label">Detail Photos (প্রতি লাইনে একটি URL)</label>' +  
+        '<textarea id="file-detail-photos" class="form-textarea" rows="3" placeholder="https://img1.jpg" style="font-family:monospace;font-size:0.82rem;">' + esc(detailPhotosStr) + '</textarea></div>' +  
+        '<div class="form-group"><label class="form-label">Status</label>' +  
+        '<select id="file-status" class="form-select">' +  
+            '<option value="approved" ' + (file.status === 'approved' || !fileId ? 'selected' : '') + '>Approved (Public)</option>' +  
+            '<option value="pending" ' + (file.status === 'pending' ? 'selected' : '') + '>Pending Review</option>' +  
+            '<option value="rejected" ' + (file.status === 'rejected' ? 'selected' : '') + '>Rejected</option>' +  
+        '</select></div>' +  
+        '<div class="flex justify-end gap-3 mt-4">' +  
+            '<button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>' +  
+            '<button type="submit" class="btn btn-success" id="save-file-btn"><i class="fas fa-save mr-2"></i> Save File</button>' +  
+        '</div>';  
+
+    setTimeout(function() {  
+        if (existingSlug) {  
+            const slugInput = document.getElementById('file-slug');  
+            if (slugInput) slugInput.dataset.userEdited = 'true';  
+        }  
+        updateSlugPreview();  
+    }, 50);  
+
+    document.getElementById('modal-form').onsubmit = function(e) { saveFile(e, fileId); };  
+    openModal();  
+}  
+
+async function saveFile(e, fileId) {  
+    e.preventDefault();  
+    const saveBtn = document.getElementById('save-file-btn');  
+    saveBtn.disabled = true;  
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';  
+
+    const existingFile = fileId ? allFiles.find(function(f) { return f.id === fileId; }) : {};  
+    const title = document.getElementById('file-title').value.trim();  
+    const customSlug = document.getElementById('file-slug').value.trim();  
+
+    let baseSlug = customSlug || generateSlugFromTitle(title);  
+    if (!baseSlug) baseSlug = 'file-' + Date.now().toString().slice(-8);  
+
+    let finalSlug = baseSlug;  
+    if (!fileId || (existingFile.id && existingFile.id !== baseSlug)) {  
+        finalSlug = await getUniqueSlug(baseSlug, fileId);  
+    }  
+
+    const detailPhotosText = document.getElementById('file-detail-photos').value.trim();  
+    const detailPhotos = detailPhotosText.split('\n').map(function(u) { return u.trim(); }).filter(function(u) { return u; });  
+
+    const fileData = {  
+        title: title,  
+        description: document.getElementById('file-description').value,  
+        thumbnail_url: document.getElementById('file-thumbnail').value,  
+        download_url: document.getElementById('file-download-url').value,  
+        file_extension: document.getElementById('file-extension').value,  
+        required_ads: parseInt(document.getElementById('file-required-ads').value) || 0,  
+        detail_photos: detailPhotos,  
+        status: document.getElementById('file-status').value,  
+        created_at: existingFile.created_at || Date.now(),  
+        total_downloads: existingFile.total_downloads || 0,  
+        uploadedBy: existingFile.uploadedBy || currentUser.uid,  
+        uploadedByEmail: existingFile.uploadedByEmail || currentUser.email  
+    };  
+
+    try {  
+        if (fileId) {  
+            if (existingFile.id !== finalSlug) {  
+                await filesRef.child(finalSlug).set(fileData);  
+                await filesRef.child(existingFile.id).remove();  
+            } else {  
+                await filesRef.child(fileId).update(fileData);  
+            }  
+        } else {  
+            await filesRef.child(finalSlug).set(fileData);  
+        }  
+        showAlert('modal-alert', '✅ File saved! URL: /file/' + finalSlug, 'success');  
+        setTimeout(function() { closeModal(); loadData(); }, 1500);  
+    } catch (error) {  
+        showAlert('modal-alert', error.message, 'error');  
+        saveBtn.disabled = false;  
+        saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Save File';  
+    }  
+}  
+
+function editFile(fileId) { openFileForm(fileId); }  
+function deleteFile(fileId, title) {  
+    openConfirmModal('Delete file "' + title + '" permanently?', async function() {  
+        await filesRef.child(fileId).remove();  
+        await loadData();  
+    });  
+}  
+
+// ==================== BANNER FORM ====================  
+function openBannerForm(bannerId) {  
+    const banner = bannerId ? allBanners.find(function(b) { return b.id === bannerId; }) : {};  
+    document.getElementById('modal-title').textContent = bannerId ? '✏️ Edit Slider' : '➕ Add Slider';  
+
+    const previewImg = banner.thumbnail_url ? '<img src="' + esc(banner.thumbnail_url) + '" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid var(--border);">' : '';  
+
+    document.getElementById('modal-form').innerHTML =   
+        '<div class="form-group"><label class="form-label">Title <span style="color:var(--red);">*</span></label>' +  
+        '<input type="text" id="banner-title" class="form-input" value="' + esc(banner.title || '') + '" required></div>' +  
+        '<div class="form-group"><label class="form-label">Image URL <span style="color:var(--red);">*</span></label>' +  
+        '<input type="url" id="banner-thumbnail" class="form-input" value="' + esc(banner.thumbnail_url || '') + '" oninput="previewBannerImage()" required>' +  
+        '<div id="banner-image-preview" style="margin-top:10px;">' + previewImg + '</div>' +  
+        '<p style="font-size:0.75rem;color:var(--text-sub);margin-top:5px;">💡 1200×630 px recommended</p></div>' +  
+        '<div class="form-group"><label class="form-label">Target Link (Optional)</label>' +  
+        '<input type="url" id="banner-download-url" class="form-input" value="' + esc(banner.download_url || '') + '" placeholder="https://example.com/page"></div>' +  
+        '<div class="flex justify-end gap-3 mt-4">' +  
+            '<button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>' +  
+            '<button type="submit" class="btn btn-success" id="save-banner-btn"><i class="fas fa-save mr-2"></i> Save Banner</button>' +  
+        '</div>';  
+
+    document.getElementById('modal-form').onsubmit = function(e) { saveBanner(e, bannerId); };  
+    openModal();  
+}  
+
+window.previewBannerImage = function() {  
+    const url = document.getElementById('banner-thumbnail').value.trim();  
+    const preview = document.getElementById('banner-image-preview');  
+    if (!url) { preview.innerHTML = ''; return; }  
+    preview.innerHTML = '<img src="' + esc(url) + '" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid var(--border);" onerror="this.style.display=\'none\'">';  
+};  
+
+async function saveBanner(e, bannerId) {  
+    e.preventDefault();  
+    const saveBtn = document.getElementById('save-banner-btn');  
+    saveBtn.disabled = true;  
+    saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';  
+
+    const existingBanner = bannerId ? allBanners.find(function(b) { return b.id === bannerId; }) : {};  
+    const bannerData = {  
+        title: document.getElementById('banner-title').value,  
+        thumbnail_url: document.getElementById('banner-thumbnail').value,  
+        download_url: document.getElementById('banner-download-url').value,  
+        created_at: existingBanner.created_at || Date.now()  
+    };  
+    try {  
+        if (bannerId) await bannersRef.child(bannerId).update(bannerData);  
+        else await bannersRef.push(bannerData);  
+        showAlert('modal-alert', '✅ Banner saved!', 'success');  
+        setTimeout(function() { closeModal(); loadData(); }, 1000);  
+    } catch (error) {  
+        showAlert('modal-alert', error.message, 'error');  
+        saveBtn.disabled = false;  
+        saveBtn.innerHTML = '<i class="fas fa-save mr-2"></i> Save Banner';  
+    }  
+}  
+
+function editBanner(bannerId) { openBannerForm(bannerId); }  
+function deleteBanner(bannerId, title) {  
+    openConfirmModal('Delete slider "' + title + '"?', async function() {  
+        await bannersRef.child(bannerId).remove();  
+        await loadData();  
+    });  
+}  
+
+// ==================== EDIT USER ====================  
+function editUser(userId) {  
+    const user = allUsers.find(function(u) { return u.id === userId; });  
+    if (!user) return;  
+    document.getElementById('modal-title').textContent = 'Edit User';  
+
+    document.getElementById('modal-form').innerHTML =   
+        '<div class="form-group"><label class="form-label">User ID</label><input type="text" class="form-input" value="' + esc(user.numericId || user.id) + '" disabled></div>' +  
+        '<div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" value="' + esc(user.email || '') + '" disabled></div>' +  
+        '<div class="form-group"><label class="form-label">Username</label><input type="text" id="user-username" class="form-input" value="' + esc(user.username || '') + '" required></div>' +  
+        '<div class="form-group"><label class="form-label">Full Name</label><input type="text" id="user-fullname" class="form-input" value="' + esc(user.fullname || '') + '" required></div>' +  
+        '<div class="flex justify-end gap-3 mt-4">' +  
+            '<button type="button" class="btn btn-danger" onclick="closeModal()">Cancel</button>' +  
+            '<button type="submit" class="btn btn-success">Save</button>' +  
+        '</div>';  
+
+    document.getElementById('modal-form').onsubmit = async function(e) {  
+        e.preventDefault();  
+        try {  
+            await usersRef.child(userId).update({  
+                username: document.getElementById('user-username').value,  
+                fullname: document.getElementById('user-fullname').value  
+            });  
+            closeModal();  
+            await loadData();  
+        } catch (err) { showAlert('modal-alert', err.message, 'error'); }  
+    };  
+    openModal();  
+}  
+
+// গ্লোবাল মেথড এক্সপোজ  
+window.toggleSidebar = toggleSidebar;  
+window.loadPage = loadPage;  
+window.logout = logout;  
+window.openModal = openModal;  
+window.closeModal = closeModal;  
+window.openConfirmModal = openConfirmModal;  
+window.closeConfirmModal = closeConfirmModal;  
+window.openFileForm = openFileForm;  
+window.editFile = editFile;  
+window.deleteFile = deleteFile;  
+window.updateFileStatus = updateFileStatus;  
+window.openBannerForm = openBannerForm;  
+window.editBanner = editBanner;  
+window.deleteBanner = deleteBanner;  
+window.editUser = editUser;  
+window.toggleUserBan = toggleUserBan;  
+window.deleteNotification = deleteNotification;  
+window.loadData = loadData;  
+window.showAlert = showAlert;  
+window.autoGenerateSlug = autoGenerateSlug;  
+window.sanitizeSlugInput = sanitizeSlugInput;  
+window.updateSlugPreview = updateSlugPreview;  
+window.openPromptForm = openPromptForm;  
+window.deletePrompt = deletePrompt;  
+window.previewSampleImage = previewSampleImage;  
+window.previewDetailPhotos = previewDetailPhotos;  
+window.previewBannerImage = previewBannerImage;  
+window.copyPromptAdmin = copyPromptAdmin;
+
+</script>  </body>  
+</html>

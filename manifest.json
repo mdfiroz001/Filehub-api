@@ -1,0 +1,19 @@
+{
+  "name": "FileHub Premium Library",
+  "short_name": "FileHub",
+  "description": "Secure files, HTML templates, AI prompts and a friendly assistant.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://i.postimg.cc/VkCqsjD1/file-00000000fa18821191576f156d4e3bfe.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
