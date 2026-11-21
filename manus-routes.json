@@ -1,0 +1,1 @@
+{"routes":[{"path":"/","title":"Home"},{"path":"/files","title":"Files"},{"path":"/prompts","title":"AI Image Prompts"},{"path":"/upload","title":"Upload"},{"path":"/profile","title":"Profile"},{"path":"/file/:id","title":"File Detail"},{"path":"/banner/:id","title":"Banner Detail"}]}
