@@ -5,7 +5,10 @@
     { "source": "/banner/:id", "destination": "/api/og?banner=:id" },
     { "source": "/template/:id", "destination": "/api/og?template=:id" },
     { "source": "/templates", "destination": "/api/og?page=templates" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/(.*)", "destination": "/admin.html" }
+    { "source": "/files", "destination": "/api/og?page=files" },
+    { "source": "/prompts", "destination": "/api/og?page=prompts" },
+    { "source": "/register", "destination": "/api/og?page=register" },
+    { "source": "/admin", "destination": "/FILEHUB.html" },
+    { "source": "/admin/(.*)", "destination": "/FILEHUB.html" }
   ]
 }
